@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>황금도시 측량단 · GOLDEN CITY SURVEY</title>
+<style>
+/* =========================================================================
+   황금도시 측량단 — 스타일시트
+   컨셉: 측량사의 제도 책상 (청사진 + 양피지 토지증서 + 황금 인장)
+   ========================================================================= */
+
+:root{
+  /* --- 청사진(배경) 계열 --- */
+  --ink-900:#0A1018;     /* 가장 깊은 잉크 */
+  --ink-800:#0E1726;     /* 메인 배경 */
+  --ink-700:#142235;
+  --ink-600:#1C2E45;
+  --grid:rgba(120,165,215,.07);   /* 청사진 격자선 */
+  --grid-bold:rgba(120,165,215,.13);
+
+  /* --- 양피지(카드) 계열 --- */
+  --paper:#ECE3CB;       /* 토지 증서 종이 */
+  --paper-2:#E2D6B6;
+  --paper-edge:#C9B98F;
+  --paper-ink:#2C2718;   /* 종이 위 글씨 */
+  --paper-ink-soft:#6B5F45;
+
+  /* --- 강조색 --- */
+  --gold:#E3B23C;        /* 귀한 순간(업적/랜드마크) */
+  --gold-hi:#F6D27A;
+  --gold-deep:#A87A1E;
+  --eco:#6FA8DC;         /* 경제 */
+  --cul:#C58BE0;         /* 문화 */
+  --grn:#5FBE96;         /* 녹지 */
+  --sat:#F0A35E;         /* 만족도 */
+  --danger:#E0685A;      /* 경고/이벤트 */
+  --ok:#5FBE96;
+
+  --txt:#DCE6F2;         /* 청사진 위 기본 글씨 */
+  --txt-dim:#8499B4;
+
+  --r:14px;
+  --shadow:0 18px 40px -12px rgba(0,0,0,.7);
+  --mono:'DM Mono','SF Mono',ui-monospace,'Cascadia Mono','Roboto Mono','Courier New',monospace;
+  --kr:'Pretendard','Apple SD Gothic Neo','Malgun Gothic','맑은 고딕',system-ui,sans-serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:var(--kr);
+  color:var(--txt);
+  background-color:var(--ink-800);
+  /* 청사진 격자 */
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px),
+    linear-gradient(var(--grid-bold) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid-bold) 1px,transparent 1px),
+    radial-gradient(ellipse at 50% -10%,rgba(60,90,130,.25),transparent 60%);
+  background-size:26px 26px,26px 26px,130px 130px,130px 130px,100% 100%;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+.mono{font-family:var(--mono);font-feature-settings:"tnum";}
+
+/* ---- 앱 루트: 화면 전환 ---- */
+#app{position:fixed;inset:0;display:flex;flex-direction:column;}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;
+  opacity:0;transition:opacity .35s ease;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;}
+.screen.active{display:flex;opacity:1;}
+.wrap{width:100%;max-width:880px;margin:0 auto;padding:18px 16px 36px;}
+
+/* ===================== 공통 버튼 ===================== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 22px;border-radius:12px;font-weight:800;font-size:15px;
+  letter-spacing:.02em;transition:transform .12s ease,filter .2s ease,box-shadow .2s;
+  border:1px solid transparent;user-select:none;
+}
+.btn:active{transform:translateY(1px) scale(.99);}
+.btn-gold{background:linear-gradient(160deg,var(--gold-hi),var(--gold) 55%,var(--gold-deep));
+  color:#2A1E04;box-shadow:0 8px 22px -8px rgba(227,178,60,.7),inset 0 1px 0 rgba(255,255,255,.4);}
+.btn-gold:hover{filter:brightness(1.06);}
+.btn-ghost{background:rgba(120,165,215,.06);border-color:rgba(120,165,215,.25);color:var(--txt);}
+.btn-ghost:hover{background:rgba(120,165,215,.13);}
+.btn-block{width:100%;}
+.btn:disabled{opacity:.4;pointer-events:none;}
+
+/* ===================== 타이틀 화면 ===================== */
+#screen-title .wrap{min-height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;gap:10px;}
+.title-eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.42em;
+  color:var(--gold);text-transform:uppercase;opacity:.9;}
+.title-main{font-size:clamp(40px,12vw,76px);font-weight:900;line-height:.92;
+  letter-spacing:-.02em;
+  background:linear-gradient(170deg,#FBE5B8,var(--gold) 45%,var(--gold-deep));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 20px rgba(227,178,60,.25));}
+.title-sub{font-family:var(--mono);font-size:13px;letter-spacing:.28em;
+  color:var(--txt-dim);margin-top:2px;}
+.title-tag{max-width:420px;color:var(--txt-dim);font-size:14px;line-height:1.6;margin:14px 0 8px;}
+.title-blueprint{width:min(340px,72vw);margin:6px auto 18px;opacity:.92;}
+.title-menu{display:flex;flex-direction:column;gap:10px;width:min(320px,86vw);}
+.title-foot{margin-top:18px;font-size:11px;color:var(--txt-dim);font-family:var(--mono);letter-spacing:.1em;}
+
+/* 한 줄 통계(타이틀 하단) */
+.life-stats{display:flex;gap:18px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.life-stat{text-align:center;}
+.life-stat b{display:block;font-family:var(--mono);font-size:20px;color:var(--gold-hi);}
+.life-stat span{font-size:10px;color:var(--txt-dim);letter-spacing:.12em;}
+
+/* ===================== 셋업(특성 선택) ===================== */
+.setup-head{text-align:center;margin-bottom:18px;}
+.setup-step{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--gold);}
+.setup-title{font-size:26px;font-weight:900;margin-top:6px;letter-spacing:-.01em;}
+.setup-desc{color:var(--txt-dim);font-size:13px;margin-top:6px;}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
+@media(max-width:520px){.choice-grid{grid-template-columns:1fr;}}
+.choice{
+  position:relative;text-align:left;padding:16px 16px 15px;border-radius:var(--r);
+  background:linear-gradient(160deg,var(--ink-700),var(--ink-600));
+  border:1px solid rgba(120,165,215,.2);transition:transform .14s,border-color .2s,box-shadow .2s;
+}
+.choice:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 14px 30px -16px rgba(227,178,60,.5);}
+.choice .ico{font-size:26px;}
+.choice .nm{font-weight:800;font-size:16px;margin-top:6px;}
+.choice .ds{font-size:12px;color:var(--txt-dim);margin-top:5px;line-height:1.5;min-height:32px;}
+.choice .fx{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.tag{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:7px;
+  background:rgba(120,165,215,.1);border:1px solid rgba(120,165,215,.18);}
+.tag.up{color:var(--ok);border-color:rgba(95,190,150,.4);}
+.tag.down{color:var(--danger);border-color:rgba(224,104,90,.4);}
+
+/* ===================== 게임 HUD ===================== */
+#screen-game .wrap{max-width:920px;padding-bottom:24px;}
+.hud{position:sticky;top:0;z-index:20;
+  background:linear-gradient(180deg,var(--ink-800) 72%,transparent);
+  padding:10px 0 14px;margin:-18px 0 8px;}
+.hud-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.year-box{display:flex;align-items:baseline;gap:8px;}
+.year-box .lab{font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:var(--txt-dim);}
+.year-box .val{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--gold-hi);}
+.year-box .of{font-family:var(--mono);font-size:13px;color:var(--txt-dim);}
+.budget{display:flex;align-items:center;gap:7px;font-family:var(--mono);
+  padding:7px 13px;border-radius:11px;background:rgba(227,178,60,.1);
+  border:1px solid rgba(227,178,60,.3);}
+.budget .v{font-size:18px;font-weight:700;color:var(--gold-hi);}
+.budget.flash-bad{animation:flashbad .5s;}
+.budget.flash-good{animation:flashgood .5s;}
+@keyframes flashbad{0%,100%{background:rgba(227,178,60,.1);}40%{background:rgba(224,104,90,.4);}}
+@keyframes flashgood{0%,100%{background:rgba(227,178,60,.1);}40%{background:rgba(95,190,150,.4);}}
+
+.progress{height:6px;border-radius:6px;background:rgba(120,165,215,.13);margin-top:10px;overflow:hidden;}
+.progress > i{display:block;height:100%;border-radius:6px;
+  background:linear-gradient(90deg,var(--gold-deep),var(--gold-hi));transition:width .5s ease;}
+
+/* 4대 지수 막대 */
+.indices{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:11px;}
+.idx{background:rgba(120,165,215,.05);border:1px solid rgba(120,165,215,.13);
+  border-radius:11px;padding:8px 9px;}
+.idx .ih{display:flex;justify-content:space-between;align-items:center;font-size:11px;}
+.idx .ih .nm{color:var(--txt-dim);letter-spacing:.04em;}
+.idx .ih .vv{font-family:var(--mono);font-weight:700;font-size:14px;}
+.idx .bar{height:5px;border-radius:5px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden;}
+.idx .bar > i{display:block;height:100%;border-radius:5px;transition:width .5s;}
+.idx.eco .vv,.idx.eco .nm{color:var(--eco);} .idx.eco .bar>i{background:var(--eco);}
+.idx.cul .vv,.idx.cul .nm{color:var(--cul);} .idx.cul .bar>i{background:var(--cul);}
+.idx.grn .vv,.idx.grn .nm{color:var(--grn);} .idx.grn .bar>i{background:var(--grn);}
+.idx.sat .vv,.idx.sat .nm{color:var(--sat);} .idx.sat .bar>i{background:var(--sat);}
+
+/* 보유 유물 줄 */
+.relic-strip{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap;align-items:center;min-height:18px;}
+.relic-strip .lab{font-family:var(--mono);font-size:10px;color:var(--txt-dim);letter-spacing:.2em;}
+.relic-chip{font-size:17px;width:30px;height:30px;display:grid;place-items:center;
+  border-radius:9px;background:rgba(227,178,60,.1);border:1px solid rgba(227,178,60,.3);cursor:help;}
+
+/* ===================== 도시 미니맵 ===================== */
+.city-panel{background:linear-gradient(160deg,var(--ink-700),var(--ink-900));
+  border:1px solid rgba(120,165,215,.18);border-radius:var(--r);
+  padding:12px;margin-top:6px;}
+.city-panel .ph{display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--txt-dim);margin-bottom:9px;}
+.city-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;}
+.tile{aspect-ratio:1;border-radius:8px;display:grid;place-items:center;font-size:clamp(15px,5vw,22px);
+  background:rgba(120,165,215,.045);border:1px dashed rgba(120,165,215,.14);
+  transition:transform .3s,background .3s;}
+.tile.filled{border-style:solid;border-color:rgba(227,178,60,.2);background:rgba(227,178,60,.05);}
+.tile.pop{animation:tilepop .45s cubic-bezier(.2,1.5,.4,1);}
+@keyframes tilepop{0%{transform:scale(0) rotate(-12deg);}100%{transform:scale(1);}}
+
+/* ===================== 카드(턴 선택지) ===================== */
+.turn-prompt{text-align:center;margin:18px 0 12px;}
+.turn-prompt .ph{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--gold);}
+.turn-prompt h2{font-size:21px;font-weight:900;margin-top:5px;}
+.turn-prompt p{color:var(--txt-dim);font-size:13px;margin-top:5px;}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+.card{
+  position:relative;border-radius:var(--r);overflow:hidden;text-align:left;
+  background:linear-gradient(165deg,var(--paper),var(--paper-2));
+  color:var(--paper-ink);border:1px solid var(--paper-edge);
+  box-shadow:var(--shadow);transition:transform .16s,box-shadow .2s;
+  animation:deal .4s cubic-bezier(.2,1,.3,1) backwards;
+}
+.card:hover{transform:translateY(-5px) rotate(-.4deg);box-shadow:0 26px 46px -16px rgba(0,0,0,.7);}
+@keyframes deal{from{transform:translateY(28px) rotate(3deg);opacity:0;}to{opacity:1;}}
+.card .ribbon{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  padding:7px 12px;color:#FBF4DD;display:flex;justify-content:space-between;align-items:center;}
+.card.land .ribbon{background:linear-gradient(90deg,#2C4A6E,#3A5E86);}
+.card.build .ribbon{background:linear-gradient(90deg,#3E5B33,#557A45);}
+.card.relic .ribbon{background:linear-gradient(90deg,var(--gold-deep),var(--gold));color:#2A1E04;}
+.card-body{padding:13px 14px 15px;}
+.card .ttl{font-weight:900;font-size:17px;letter-spacing:-.01em;}
+.card .meta{font-size:12px;color:var(--paper-ink-soft);margin-top:3px;min-height:16px;}
+.blueprint-slot{margin:11px 0;background:#0E2238;border-radius:10px;padding:8px;
+  border:1px solid #224366;}
+.blueprint-slot svg{display:block;width:100%;height:auto;}
+.statline{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  padding:3px 0;border-bottom:1px dashed rgba(44,39,24,.18);}
+.statline:last-child{border-bottom:none;}
+.statline .k{color:var(--paper-ink-soft);}
+.statline .v{font-weight:700;}
+.statline .v.hidden{color:#9C7B3A;letter-spacing:.1em;}
+.card-cta{margin-top:11px;width:100%;padding:11px;border-radius:10px;font-weight:800;font-size:14px;
+  background:linear-gradient(160deg,var(--ink-700),var(--ink-600));color:#EAF1FA;
+  border:1px solid rgba(120,165,215,.25);transition:filter .2s;}
+.card-cta:hover{filter:brightness(1.18);}
+.card.relic .card-cta{background:linear-gradient(160deg,var(--gold),var(--gold-deep));color:#2A1E04;}
+
+.fx-mini{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;}
+.fx-mini span{font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:6px;font-weight:700;}
+.fx-eco{background:rgba(111,168,220,.18);color:#1C4E7A;}
+.fx-cul{background:rgba(197,139,224,.2);color:#6B3A86;}
+.fx-grn{background:rgba(95,190,150,.2);color:#236B4A;}
+.fx-sat{background:rgba(240,163,94,.22);color:#8A4E14;}
+.fx-neg{background:rgba(224,104,90,.18);color:#8A2C20;}
+
+.turn-foot{display:flex;gap:10px;margin-top:16px;}
+
+/* ===================== 모달(계산/이벤트) ===================== */
+.overlay{position:fixed;inset:0;z-index:60;background:rgba(8,12,20,.78);
+  backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:18px;}
+.overlay.show{display:flex;animation:fade .25s;}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+.modal{width:100%;max-width:440px;border-radius:18px;overflow:hidden;
+  background:linear-gradient(170deg,var(--paper),var(--paper-2));color:var(--paper-ink);
+  box-shadow:0 30px 70px -10px rgba(0,0,0,.8);animation:rise .3s cubic-bezier(.2,1,.3,1);}
+@keyframes rise{from{transform:translateY(30px) scale(.96);opacity:0;}to{transform:none;opacity:1;}}
+.modal-head{padding:13px 18px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;color:#FBF4DD;background:linear-gradient(90deg,#2C4A6E,#3A5E86);
+  display:flex;justify-content:space-between;align-items:center;}
+.modal-body{padding:18px;}
+.modal-body h3{font-size:19px;font-weight:900;}
+.q-shape{margin:14px 0;background:#0E2238;border-radius:12px;padding:14px;border:1px solid #224366;}
+.q-shape svg{display:block;width:100%;height:auto;max-height:230px;}
+.q-text{font-size:15px;line-height:1.6;text-align:center;font-weight:700;}
+.q-text .hl{color:var(--gold-deep);font-family:var(--mono);}
+.answer-row{display:flex;gap:10px;align-items:stretch;margin-top:6px;}
+.answer-row input{flex:1;font-family:var(--mono);font-size:22px;font-weight:700;text-align:center;
+  padding:13px;border-radius:12px;background:#FFFDF5;border:2px solid var(--paper-edge);
+  color:var(--paper-ink);outline:none;-moz-appearance:textfield;}
+.answer-row input::-webkit-outer-spin-button,.answer-row input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.answer-row input:focus{border-color:var(--gold);}
+.unit-suffix{display:grid;place-items:center;font-family:var(--mono);font-weight:800;
+  padding:0 14px;border-radius:12px;background:rgba(44,39,24,.08);font-size:15px;}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+.keypad button{padding:14px;border-radius:11px;font-family:var(--mono);font-size:19px;font-weight:700;
+  background:#FFFDF5;border:1px solid var(--paper-edge);color:var(--paper-ink);transition:filter .12s;}
+.keypad button:active{filter:brightness(.9);}
+.keypad button.act{background:linear-gradient(160deg,var(--gold),var(--gold-deep));color:#2A1E04;border:none;}
+.q-hint{margin-top:12px;font-size:12px;color:var(--paper-ink-soft);text-align:center;line-height:1.5;}
+.q-feedback{margin-top:12px;padding:12px;border-radius:11px;font-weight:700;text-align:center;display:none;}
+.q-feedback.ok{display:block;background:rgba(95,190,150,.2);color:#236B4A;border:1px solid rgba(95,190,150,.5);}
+.q-feedback.no{display:block;background:rgba(224,104,90,.18);color:#8A2C20;border:1px solid rgba(224,104,90,.5);}
+
+/* 이벤트 모달 선택지 */
+.event-choices{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+.event-choice{text-align:left;padding:13px 15px;border-radius:12px;background:#FFFDF5;
+  border:1px solid var(--paper-edge);transition:transform .12s,border-color .2s;}
+.event-choice:hover{transform:translateX(3px);border-color:var(--gold);}
+.event-choice .ec-t{font-weight:800;font-size:14px;}
+.event-choice .ec-d{font-size:12px;color:var(--paper-ink-soft);margin-top:3px;}
+
+/* ===================== 토스트 / 해금 연출 ===================== */
+#toasts{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:80;
+  display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:max-content;max-width:92vw;}
+.toast{font-size:13px;font-weight:700;padding:10px 16px;border-radius:11px;
+  background:var(--ink-700);border:1px solid rgba(120,165,215,.3);color:var(--txt);
+  box-shadow:var(--shadow);animation:toastin .35s,toastout .35s 2.4s forwards;}
+.toast.gold{background:linear-gradient(160deg,var(--gold),var(--gold-deep));color:#2A1E04;border:none;}
+.toast.grn{border-color:rgba(95,190,150,.5);} .toast.bad{border-color:rgba(224,104,90,.5);}
+@keyframes toastin{from{transform:translateY(-16px);opacity:0;}}
+@keyframes toastout{to{transform:translateY(-16px);opacity:0;}}
+
+/* 업적/특구 해금 풀스크린 플래시 */
+.unlock-pop{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;
+  background:rgba(8,12,20,.6);backdrop-filter:blur(3px);}
+.unlock-pop.show{display:flex;animation:fade .3s;}
+.unlock-card{text-align:center;padding:30px 36px;border-radius:20px;
+  background:linear-gradient(165deg,var(--ink-700),var(--ink-900));
+  border:1px solid var(--gold);box-shadow:0 0 60px -10px rgba(227,178,60,.5);
+  animation:rise .4s cubic-bezier(.2,1.4,.4,1);max-width:340px;}
+.unlock-card .uk-kind{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--gold);}
+.unlock-card .uk-ico{font-size:54px;margin:10px 0;filter:drop-shadow(0 4px 14px rgba(227,178,60,.5));}
+.unlock-card .uk-nm{font-size:22px;font-weight:900;}
+.unlock-card .uk-ds{font-size:13px;color:var(--txt-dim);margin-top:8px;line-height:1.5;}
+
+/* ===================== 결과 화면 ===================== */
+#screen-result .wrap{padding-top:30px;}
+.ending-hero{text-align:center;padding:26px 18px;border-radius:20px;margin-bottom:18px;
+  background:linear-gradient(165deg,var(--ink-700),var(--ink-900));
+  border:1px solid rgba(227,178,60,.3);}
+.ending-hero .grade{font-family:var(--mono);font-size:64px;font-weight:800;line-height:1;
+  background:linear-gradient(170deg,var(--gold-hi),var(--gold-deep));
+  -webkit-background-clip:text;background-clip:text;color:transparent;}
+.ending-hero .e-nm{font-size:28px;font-weight:900;margin-top:8px;}
+.ending-hero .e-ds{color:var(--txt-dim);font-size:14px;margin-top:8px;line-height:1.6;max-width:480px;margin-left:auto;margin-right:auto;}
+.ending-hero.secret{border-color:var(--gold);box-shadow:0 0 80px -20px rgba(227,178,60,.6);}
+
+.final-city{background:linear-gradient(160deg,var(--ink-700),var(--ink-900));
+  border:1px solid rgba(120,165,215,.18);border-radius:var(--r);padding:14px;margin-bottom:16px;}
+.final-city .ph{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--txt-dim);margin-bottom:10px;text-align:center;}
+
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+@media(max-width:520px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-cell{background:rgba(120,165,215,.05);border:1px solid rgba(120,165,215,.13);
+  border-radius:12px;padding:13px;text-align:center;}
+.stat-cell .sv{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--gold-hi);}
+.stat-cell .sl{font-size:11px;color:var(--txt-dim);margin-top:3px;letter-spacing:.05em;}
+
+.result-section-h{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--gold);
+  margin:18px 0 10px;text-transform:uppercase;}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{font-size:12px;padding:6px 11px;border-radius:9px;background:rgba(227,178,60,.1);
+  border:1px solid rgba(227,178,60,.3);display:flex;align-items:center;gap:6px;}
+
+/* ===================== 도감 화면 ===================== */
+.codex-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.codex-tab{padding:9px 15px;border-radius:10px;font-weight:700;font-size:13px;
+  background:rgba(120,165,215,.06);border:1px solid rgba(120,165,215,.18);color:var(--txt-dim);}
+.codex-tab.active{background:rgba(227,178,60,.13);border-color:var(--gold);color:var(--gold-hi);}
+.codex-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.codex-item{padding:13px;border-radius:12px;background:rgba(120,165,215,.05);
+  border:1px solid rgba(120,165,215,.13);display:flex;gap:11px;align-items:flex-start;}
+.codex-item.locked{opacity:.5;filter:grayscale(.6);}
+.codex-item .ci-ico{font-size:26px;flex-shrink:0;width:34px;text-align:center;}
+.codex-item .ci-nm{font-weight:800;font-size:14px;}
+.codex-item .ci-ds{font-size:11.5px;color:var(--txt-dim);margin-top:3px;line-height:1.45;}
+.codex-item.locked .ci-nm,.codex-item.locked .ci-ico{color:var(--txt-dim);}
+
+.section-title{font-size:24px;font-weight:900;}
+.section-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.back-link{font-size:13px;color:var(--txt-dim);font-weight:700;}
+.back-link:hover{color:var(--gold-hi);}
+
+/* 스크롤바 */
+::-webkit-scrollbar{width:9px;}
+::-webkit-scrollbar-thumb{background:rgba(120,165,215,.22);border-radius:9px;}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.001s!important;transition-duration:.001s!important;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===================== 타이틀 ===================== -->
+  <section class="screen active" id="screen-title">
+    <div class="wrap">
+      <div class="title-eyebrow">CITY SURVEY · EST. 20XX</div>
+      <h1 class="title-main">황금도시<br>측량단</h1>
+      <div class="title-sub">THE GOLDEN CITY SURVEY</div>
+      <div class="title-blueprint" id="titleBlueprint"></div>
+      <p class="title-tag">20년 동안 도시를 설계하는 측량사장이 되세요.<br>
+        땅을 <b>재고</b>, 가치를 <b>계산하고</b>, 황금도시를 세웁니다.</p>
+      <div class="title-menu">
+        <button class="btn btn-gold btn-block" id="btnStart">측량 시작</button>
+        <button class="btn btn-ghost btn-block" id="btnCodex">수집 도감</button>
+        <button class="btn btn-ghost btn-block" id="btnHowto">측량 안내서</button>
+      </div>
+      <div class="life-stats" id="lifeStats"></div>
+      <div class="title-foot">초등 5학년 · 다각형의 둘레와 넓이</div>
+    </div>
+  </section>
+
+  <!-- ===================== 셋업 ===================== -->
+  <section class="screen" id="screen-setup">
+    <div class="wrap">
+      <div class="setup-head">
+        <div class="setup-step" id="setupStep">STEP 1 / 2</div>
+        <h2 class="setup-title" id="setupTitle">도시의 지형을 고르세요</h2>
+        <p class="setup-desc" id="setupDesc">지형에 따라 유리한 전략이 달라집니다.</p>
+      </div>
+      <div class="choice-grid" id="setupChoices"></div>
+    </div>
+  </section>
+
+  <!-- ===================== 게임 ===================== -->
+  <section class="screen" id="screen-game">
+    <div class="wrap">
+      <div class="hud">
+        <div class="hud-top">
+          <div class="year-box">
+            <span class="lab">YEAR</span>
+            <span class="val" id="hudYear">1</span>
+            <span class="of">/ 20</span>
+          </div>
+          <div class="budget" id="hudBudget">
+            <span>예산</span><span class="v" id="hudBudgetVal">0</span><span>억</span>
+          </div>
+        </div>
+        <div class="progress"><i id="hudProgress" style="width:5%"></i></div>
+        <div class="indices">
+          <div class="idx eco"><div class="ih"><span class="nm">경제</span><span class="vv" id="ixEco">0</span></div><div class="bar"><i id="barEco"></i></div></div>
+          <div class="idx cul"><div class="ih"><span class="nm">문화</span><span class="vv" id="ixCul">0</span></div><div class="bar"><i id="barCul"></i></div></div>
+          <div class="idx grn"><div class="ih"><span class="nm">녹지</span><span class="vv" id="ixGrn">0</span></div><div class="bar"><i id="barGrn"></i></div></div>
+          <div class="idx sat"><div class="ih"><span class="nm">만족</span><span class="vv" id="ixSat">0</span></div><div class="bar"><i id="barSat"></i></div></div>
+        </div>
+        <div class="relic-strip" id="relicStrip"><span class="lab">유물</span></div>
+      </div>
+
+      <div class="city-panel">
+        <div class="ph"><span id="cityName">우리 도시</span><span id="cityCount">0 / 24 구역</span></div>
+        <div class="city-grid" id="cityGrid"></div>
+      </div>
+
+      <div class="turn-prompt" id="turnPrompt">
+        <div class="ph">PHASE</div>
+        <h2 id="turnTitle">땅을 살펴보세요</h2>
+        <p id="turnSub"></p>
+      </div>
+      <div class="cards" id="cardArea"></div>
+      <div class="turn-foot" id="turnFoot"></div>
+    </div>
+  </section>
+
+  <!-- ===================== 결과 ===================== -->
+  <section class="screen" id="screen-result">
+    <div class="wrap" id="resultWrap"></div>
+  </section>
+
+  <!-- ===================== 도감 ===================== -->
+  <section class="screen" id="screen-codex">
+    <div class="wrap">
+      <div class="section-bar">
+        <h2 class="section-title">수집 도감</h2>
+        <button class="back-link" id="codexBack">← 돌아가기</button>
+      </div>
+      <div class="codex-tabs" id="codexTabs"></div>
+      <div id="codexProgress" class="setup-desc" style="margin-bottom:12px;"></div>
+      <div class="codex-list" id="codexList"></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- 오버레이: 계산 모달 -->
+<div class="overlay" id="overlayCalc">
+  <div class="modal">
+    <div class="modal-head"><span id="calcHeadLabel">측량 계산</span><span id="calcHeadRight"></span></div>
+    <div class="modal-body">
+      <h3 id="calcTitle"></h3>
+      <div class="q-shape" id="calcShape"></div>
+      <p class="q-text" id="calcText"></p>
+      <div class="answer-row">
+        <input id="calcInput" type="number" inputmode="numeric" placeholder="답" autocomplete="off">
+        <div class="unit-suffix" id="calcUnit">㎡</div>
+      </div>
+      <div class="q-hint" id="calcHint"></div>
+      <div class="q-feedback" id="calcFeedback"></div>
+      <button class="btn btn-gold btn-block" id="calcSubmit" style="margin-top:14px;">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 오버레이: 이벤트 모달 -->
+<div class="overlay" id="overlayEvent">
+  <div class="modal">
+    <div class="modal-head" style="background:linear-gradient(90deg,#7A3B2E,#A8503A);"><span>도시 사건</span><span>EVENT</span></div>
+    <div class="modal-body">
+      <h3 id="evTitle"></h3>
+      <p class="setup-desc" id="evDesc" style="color:var(--paper-ink-soft);margin-top:8px;"></p>
+      <div class="event-choices" id="evChoices"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 해금 팝업 -->
+<div class="unlock-pop" id="unlockPop">
+  <div class="unlock-card">
+    <div class="uk-kind" id="ukKind"></div>
+    <div class="uk-ico" id="ukIco"></div>
+    <div class="uk-nm" id="ukNm"></div>
+    <div class="uk-ds" id="ukDs"></div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+"use strict";
+//__JS_INJECTION_POINT__
+
+/* =========================================================================
+ *  [1] 상수 & 데이터 테이블
+ *  - 게임 밸런스 수치와 모든 콘텐츠(특성/건물/유물/특구/업적/엔딩)를 한곳에 모음
+ * ========================================================================= */
+
+const CFG = {
+  TOTAL_YEARS: 20,
+  GRID: 24,                 // 도시 미니맵 칸 수 (6 x 4)
+  START_BUDGET: 40,         // 시작 예산(억)
+  BASE_INCOME: 8,           // 매 턴 기본 수입
+  ECO_INCOME_DIV: 4,        // 경제지수 → 수입 환산
+  UPKEEP_RATE: 0.05,        // 둘레 1m 당 유지비(낮게: 효율 넛지용)
+  PRECISION_BONUS: 0.20,    // 정밀 측량(정답) 시 건물 효과 보너스
+  RELIC_YEARS: [4, 9, 14],  // 유물을 고르는 해
+  EVENT_CHANCE: 0.45,       // 이벤트 발생 확률
+};
+
+/* ---- 4대 지수 정의 ---- */
+const INDEX_KEYS = ['eco', 'cul', 'grn', 'sat'];
+const INDEX_LABEL = { eco: '경제', cul: '문화', grn: '녹지', sat: '만족도' };
+
+/* ---- 도시 지형(매 판 랜덤 3개 중 택1) ---- */
+const CITY_TRAITS = [
+  { id:'coast', ico:'🌊', nm:'해안도시', ds:'공원과 항구가 빛나는 바닷가 도시.',
+    fx:['공원·정원 효과 +50%','항구 효과 +40%'], mod:{ parkBonus:0.5, harborBonus:0.4 } },
+  { id:'industry', ico:'🏭', nm:'산업도시', ds:'공장과 연구소가 경제를 이끈다.',
+    fx:['경제 건물 효과 +50%','유지비 +10%'], mod:{ ecoBuildBonus:0.5, upkeepMul:0.1 } },
+  { id:'mountain', ico:'⛰️', nm:'산악도시', ds:'험한 지형, 그러나 풍경은 일품.',
+    fx:['둘레 유지비 +30%','관광·만족 +25%'], mod:{ upkeepMul:0.3, satBonus:0.25 } },
+  { id:'tourist', ico:'🎡', nm:'관광도시', ds:'사람들이 찾아오는 문화의 거리.',
+    fx:['문화 건물 효과 +40%'], mod:{ culBuildBonus:0.4 } },
+  { id:'farm', ico:'🌾', nm:'농업도시', ds:'드넓은 평야, 넉넉한 녹지.',
+    fx:['녹지 +35%','넓은 땅 보너스'], mod:{ grnBonus:0.35, bigLandBonus:true } },
+  { id:'tech', ico:'🛰️', nm:'첨단도시', ds:'미래를 설계하는 기술 도시.',
+    fx:['연구·복합단지 효과 +45%'], mod:{ techBonus:0.45 } },
+];
+
+/* ---- 시장(시작 시 택1) ---- */
+const MAYOR_TRAITS = [
+  { id:'tycoon', ico:'💼', nm:'경제 천재', ds:'돈 버는 데는 일가견이 있다.',
+    fx:[['경제','up'],['문화','down']], start:{ eco:10, cul:-5 }, bonusBudget:5 },
+  { id:'green', ico:'🌱', nm:'친환경주의자', ds:'초록 도시가 곧 좋은 도시.',
+    fx:[['녹지','up'],['경제','down']], start:{ grn:10, eco:-5 } },
+  { id:'planner', ico:'📐', nm:'도시설계자', ds:'정밀한 측량은 기본 소양.',
+    fx:[['측량 정밀보너스','up']], start:{}, planner:true },
+  { id:'people', ico:'🤝', nm:'시민시장', ds:'시민의 행복이 최우선.',
+    fx:[['만족도','up']], start:{ sat:10 } },
+  { id:'scholar', ico:'📚', nm:'학자 출신', ds:'배움과 문화를 사랑한다.',
+    fx:[['문화','up'],['만족도','up']], start:{ cul:7, sat:3 } },
+  { id:'banker', ico:'🏦', nm:'재정 전문가', ds:'곳간을 든든히 채운다.',
+    fx:[['시작 예산 +12','up']], start:{}, bonusBudget:12 },
+];
+
+/* ---- 건물(개발 카드) ----
+ *  cat: 특구 조합에 쓰이는 분류 / base: 기본 지수효과 / cost: 건설비 / up: 유지비 가중
+ */
+const BUILDINGS = [
+  { id:'park',     nm:'공원',     ico:'🌳', cat:'park',   cost:5,  up:0.8, base:{grn:9, sat:3} },
+  { id:'garden',   nm:'식물원',   ico:'🪴', cat:'garden', cost:6,  up:0.7, base:{grn:11, sat:2} },
+  { id:'library',  nm:'도서관',   ico:'📖', cat:'library',cost:6,  up:1.0, base:{cul:9, sat:2} },
+  { id:'museum',   nm:'박물관',   ico:'🏛️', cat:'museum', cost:8,  up:1.1, base:{cul:11, sat:1} },
+  { id:'gallery',  nm:'미술관',   ico:'🖼️', cat:'gallery',cost:7,  up:1.0, base:{cul:8, sat:3} },
+  { id:'stadium',  nm:'운동장',   ico:'🏟️', cat:'stadium',cost:7,  up:1.2, base:{sat:10, eco:2} },
+  { id:'mall',     nm:'쇼핑몰',   ico:'🛍️', cat:'mall',   cost:8,  up:1.3, base:{eco:11, sat:2} },
+  { id:'market',   nm:'전통시장', ico:'🏪', cat:'market', cost:5,  up:0.9, base:{eco:8, sat:2} },
+  { id:'apart',    nm:'아파트',   ico:'🏢', cat:'apart',  cost:7,  up:1.1, base:{sat:7, eco:4} },
+  { id:'lab',      nm:'연구소',   ico:'🔬', cat:'lab',    cost:9,  up:1.2, base:{eco:12} },
+  { id:'culture',  nm:'문화센터', ico:'🎭', cat:'culture',cost:7,  up:1.0, base:{cul:7, sat:5} },
+  { id:'complex',  nm:'복합단지', ico:'🏬', cat:'complex',cost:10, up:1.4, base:{eco:8, sat:6} },
+  { id:'school',   nm:'학교',     ico:'🏫', cat:'school', cost:6,  up:1.0, base:{cul:6, sat:5} },
+  { id:'hospital', nm:'병원',     ico:'🏥', cat:'hospital',cost:8, up:1.1, base:{sat:11} },
+  { id:'plaza',    nm:'광장',     ico:'⛲', cat:'plaza',  cost:5,  up:0.8, base:{sat:6, cul:4} },
+  { id:'power',    nm:'발전소',   ico:'⚡', cat:'power',  cost:8,  up:1.1, base:{eco:13, grn:-6} },
+  { id:'harbor',   nm:'항구',     ico:'⚓', cat:'harbor', cost:9,  up:1.2, base:{eco:10, sat:2} },
+  { id:'landmark', nm:'랜드마크', ico:'🗼', cat:'landmark',cost:14,up:1.5, base:{eco:5, cul:6, grn:2, sat:6} },
+];
+const BUILDING_MAP = Object.fromEntries(BUILDINGS.map(b => [b.id, b]));
+
+/* ---- 특구(특정 건물 조합 완성 시 자동 생성) ----
+ *  req: { cat: 필요수 } / bonus: 완성 시 일회성 지수 보너스
+ */
+const DISTRICTS = [
+  { id:'culture',  nm:'문화특구',     ico:'🎨', req:{library:1,museum:1,gallery:1}, bonus:{cul:14,sat:4}, ds:'도서관·박물관·미술관이 모인 예술의 심장.' },
+  { id:'sports',   nm:'스포츠타운',   ico:'🏅', req:{stadium:1,park:1,apart:1},     bonus:{sat:14,eco:3}, ds:'운동장·공원·주거가 어우러진 활기찬 동네.' },
+  { id:'newtown',  nm:'신도시',       ico:'🌆', req:{mall:1,apart:1,lab:1},          bonus:{eco:12,sat:6}, ds:'쇼핑몰·아파트·연구소의 미래형 도심.' },
+  { id:'green',    nm:'녹색지구',     ico:'🌿', req:{park:1,garden:1,school:1},      bonus:{grn:14,sat:4}, ds:'공원·식물원·학교가 만든 초록 마을.' },
+  { id:'edu',      nm:'교육밸리',     ico:'🎓', req:{school:1,library:1,lab:1},      bonus:{cul:10,eco:6}, ds:'배움과 연구가 흐르는 지식의 골짜기.' },
+  { id:'commerce', nm:'상업중심',     ico:'💰', req:{mall:1,market:1,complex:1},     bonus:{eco:14,sat:2}, ds:'사람과 돈이 모이는 번화가.' },
+  { id:'medi',     nm:'의료복합',     ico:'💊', req:{hospital:1,apart:1,park:1},     bonus:{sat:13,grn:3}, ds:'건강을 지키는 안심 생활권.' },
+  { id:'tour',     nm:'관광특구',     ico:'📸', req:{landmark:1,gallery:1,plaza:1},  bonus:{cul:10,eco:8}, ds:'전 세계 관광객을 부르는 명소.' },
+  { id:'rnd',      nm:'첨단연구단지', ico:'🧪', req:{lab:1,complex:1,power:1},       bonus:{eco:15}, ds:'기술이 폭발하는 연구 클러스터.' },
+  { id:'port',     nm:'항만경제구',   ico:'🚢', req:{harbor:1,market:1,mall:1},      bonus:{eco:13,sat:3}, ds:'바다로 열린 무역의 관문.' },
+  { id:'art',      nm:'예술의거리',   ico:'🎻', req:{gallery:1,culture:1,plaza:1},   bonus:{cul:13,sat:5}, ds:'골목마다 예술이 흐르는 거리.' },
+  { id:'civic',    nm:'시민광장지구', ico:'🕊️', req:{plaza:1,park:1,school:1},        bonus:{sat:12,cul:3}, ds:'시민이 모이는 광장 중심 생활권.' },
+  { id:'energy',   nm:'에너지타운',   ico:'🔋', req:{power:1,lab:1,complex:1},       bonus:{eco:13,grn:2}, ds:'미래 에너지를 만드는 동네.' },
+  { id:'home',     nm:'주거안정구',   ico:'🏘️', req:{apart:2,hospital:1},            bonus:{sat:13,eco:3}, ds:'살기 좋은 안정된 주거지.' },
+  { id:'heritage', nm:'역사문화벨트', ico:'📜', req:{museum:1,library:1,landmark:1}, bonus:{cul:15,sat:3}, ds:'도시의 역사를 잇는 문화 축.' },
+  { id:'ecocity',  nm:'친환경모범도시',ico:'♻️', req:{garden:1,park:2},               bonus:{grn:15,sat:3}, ds:'녹지로 가득한 모범 친환경 도시.' },
+  { id:'downtown', nm:'복합도심',     ico:'🌃', req:{complex:1,mall:1,landmark:1},   bonus:{eco:12,sat:6}, ds:'밤에도 빛나는 중심 도심.' },
+  { id:'wellness', nm:'웰니스시티',   ico:'🧘', req:{park:1,hospital:1,garden:1},    bonus:{sat:12,grn:5}, ds:'몸과 마음이 쉬어가는 도시.' },
+  { id:'knowledge',nm:'지식산업단지', ico:'💡', req:{lab:1,school:1,complex:1},      bonus:{eco:11,cul:5}, ds:'아이디어가 산업이 되는 곳.' },
+  { id:'golden',   nm:'황금중심가',   ico:'👑', req:{landmark:1,complex:1,mall:1},   bonus:{eco:10,cul:6,grn:4,sat:8}, ds:'모든 것이 모인 황금의 중심.' },
+  { id:'tradehub', nm:'시장경제권',   ico:'📦', req:{market:1,mall:1,harbor:1},      bonus:{eco:14}, ds:'물류와 상업의 거점.' },
+  { id:'youth',    nm:'청소년문화존', ico:'🛹', req:{stadium:1,school:1,culture:1},  bonus:{sat:11,cul:5}, ds:'젊음이 넘치는 활력의 거리.' },
+];
+
+/* ---- 유물(빌드를 결정하는 패시브/능동 효과) 32종 ----
+ *  f: 효과 설명용 태그, 실제 효과는 게임 로직에서 id로 분기
+ */
+const RELICS = [
+  { id:'goldenRuler', nm:'황금 자',       ico:'📏', ds:'넓이 문제를 맞히면 그 해 예산 보너스 +20%.' },
+  { id:'smartMeter',  nm:'스마트 측정기', ico:'📟', ds:'계산 실수 1회를 정답으로 처리(1회용).' },
+  { id:'whitePaper',  nm:'도시계획 백서', ico:'📑', ds:'문화 건물(도서관·박물관·미술관·문화센터) 효과 +60%.' },
+  { id:'greenBudget', nm:'녹색 예산안',   ico:'💚', ds:'공원·식물원 효과 +60%.' },
+  { id:'recon',       nm:'초정밀 드론',   ico:'🛸', ds:'측량 전에도 토지의 효율 등급을 살짝 보여준다.' },
+  { id:'compass',     nm:'황동 나침반',   ico:'🧭', ds:'둘레 문제를 맞히면 그 건물 유지비 -30%.' },
+  { id:'taxLedger',   nm:'세금 장부',     ico:'🧾', ds:'매년 예산 +3.' },
+  { id:'stamp',       nm:'청사진 인장',   ico:'🔖', ds:'모든 건설비 -20%.' },
+  { id:'license',     nm:'측량 면허',     ico:'🎫', ds:'계산 정답마다 만족도 +1.' },
+  { id:'doubleDeed',  nm:'이중 등기부',   ico:'📋', ds:'매년 토지 후보가 1개 더 제시된다.' },
+  { id:'ecoCharter',  nm:'친환경 헌장',   ico:'🌎', ds:'녹지 50 이상이면 매년 경제 +2.' },
+  { id:'patron',      nm:'문화 후원자',   ico:'🎩', ds:'문화 건물을 지을 때 예산 30% 환급.' },
+  { id:'magnet',      nm:'인재 자석',     ico:'🧲', ds:'만족도 효과 +35%.' },
+  { id:'solar',       nm:'태양광 보조금', ico:'☀️', ds:'발전소의 녹지 페널티 제거 + 경제 보너스.' },
+  { id:'heritage',    nm:'문화재 지정서', ico:'🏺', ds:'박물관·미술관 효과 +50%.' },
+  { id:'unitMaster',  nm:'단위 변환기',   ico:'🔢', ds:'단위 변환 문제를 항상 정답 처리.' },
+  { id:'square',      nm:'완벽한 직각자', ico:'⊿', ds:'직사각형·정사각형 부지 효과 +30%.' },
+  { id:'triangle',    nm:'행운의 삼각자', ico:'📐', ds:'삼각형 부지 효과 +35%.' },
+  { id:'rhombus',     nm:'마름모 보석',   ico:'💎', ds:'마름모 부지 효과 +45%.' },
+  { id:'banner',      nm:'연승 깃발',     ico:'🚩', ds:'연속 정답 보너스가 2배로 쌓인다.' },
+  { id:'cornerstone', nm:'주춧돌',        ico:'🧱', ds:'획득 즉시 예산 +10.' },
+  { id:'seal',        nm:'시장 직인',     ico:'🪧', ds:'획득 즉시 모든 지수 +4.' },
+  { id:'quarry',      nm:'채석장',        ico:'🪨', ds:'건설비 -10%, 모든 유지비 -10%.' },
+  { id:'archive',     nm:'기록보관소',    ico:'🗄️', ds:'도서관 효과 +60%.' },
+  { id:'festival',    nm:'축제 위원회',   ico:'🎉', ds:'좋은 이벤트의 만족도 효과 +50%.' },
+  { id:'investor',    nm:'투자 정보지',   ico:'📰', ds:'측량 성공 시 예상 수익을 정확히 알려준다.' },
+  { id:'cleanTech',   nm:'청정 기술',     ico:'🌬️', ds:'모든 건물 유지비 -18%.' },
+  { id:'goldVein',    nm:'황금 광맥',     ico:'⛏️', ds:'오답이 0인 동안 매년 예산이 점점 더 늘어난다.' },
+  { id:'masterPlan',  nm:'마스터플랜',    ico:'🗺️', ds:'특구 완성 보너스 +60%.' },
+  { id:'citizen',     nm:'시민의 소리',   ico:'📣', ds:'만족도 60 이상이면 매년 전 지수 +1.' },
+  { id:'tape',        nm:'줄자 명인',     ico:'🧵', ds:'측량 정밀보너스가 +10%p 더 커진다.' },
+  { id:'landBank',    nm:'토지은행',      ico:'🏦', ds:'그 해 건설을 쉬면 예산 +6.' },
+];
+const RELIC_MAP = Object.fromEntries(RELICS.map(r => [r.id, r]));
+
+
+/* =========================================================================
+ *  [2] 업적 / 엔딩 / 이벤트
+ *  업적·엔딩의 판정 함수는 통계 객체 S 를 읽는다.
+ *  S 에는 이번 판 통계 + 평생 누적 통계(lifetime)가 합쳐져 들어온다.
+ * ========================================================================= */
+
+/* ---- 업적 50종 ---- */
+const ACHIEVEMENTS = [
+  { id:'firstCity',   nm:'첫 도시',         ico:'🏙️', ds:'도시를 처음으로 완성하다.',            chk:S=>S.gamesPlayed>=1 },
+  { id:'firstDistrict',nm:'첫 특구',        ico:'🏗️', ds:'특구를 처음 완성하다.',                chk:S=>S.districts>=1 },
+  { id:'firstRelic',  nm:'첫 유물',         ico:'🗝️', ds:'유물을 처음 획득하다.',                chk:S=>S.relics>=1 },
+  { id:'firstSurvey', nm:'첫 정밀측량',     ico:'🔎', ds:'측량 계산을 처음 성공하다.',          chk:S=>S.correct>=1 },
+  { id:'noWrong',     nm:'무오답',          ico:'✅', ds:'오답 없이 한 판을 끝내다.',           chk:S=>S.ended&&S.wrong===0&&S.total>=10 },
+  { id:'streak5',     nm:'5연속 정답',      ico:'🔥', ds:'5문제 연속 정답.',                     chk:S=>S.maxStreak>=5 },
+  { id:'streak10',    nm:'10연속 정답',     ico:'☄️', ds:'10문제 연속 정답.',                    chk:S=>S.maxStreak>=10 },
+  { id:'periMaster',  nm:'둘레 마스터',     ico:'🧷', ds:'둘레 문제 10개 정답.',                 chk:S=>S.kPeri>=10 },
+  { id:'areaMaster',  nm:'넓이 마스터',     ico:'📐', ds:'넓이 문제 15개 정답.',                 chk:S=>S.kArea>=15 },
+  { id:'unitPro',     nm:'단위변환 전문가', ico:'🔢', ds:'단위변환 문제 6개 정답.',             chk:S=>S.kUnit>=6 },
+  { id:'triLover',    nm:'삼각형 애호가',   ico:'△',  ds:'삼각형 넓이 8개 정답.',                chk:S=>S.sTriangle>=8 },
+  { id:'rhoLover',    nm:'마름모 장인',     ico:'◆',  ds:'마름모 넓이 5개 정답.',                chk:S=>S.sRhombus>=5 },
+  { id:'trapLover',   nm:'사다리꼴 달인',   ico:'▱',  ds:'사다리꼴 넓이 5개 정답.',              chk:S=>S.sTrapezoid>=5 },
+  { id:'paraLover',   nm:'평행사변형 달인', ico:'▰',  ds:'평행사변형 넓이 5개 정답.',            chk:S=>S.sParallelogram>=5 },
+  { id:'survey30',    nm:'측량 베테랑',     ico:'🧭', ds:'한 판에 계산 30회 도전.',             chk:S=>S.total>=30 },
+  { id:'fastLearner', nm:'측량 신동',       ico:'🎯', ds:'정답률 90% 이상(15문제+).',           chk:S=>S.total>=15&&S.accuracy>=90 },
+  { id:'perfectionist',nm:'완벽주의',       ico:'💯', ds:'정답률 100%로 완주(20문제+).',        chk:S=>S.ended&&S.accuracy===100&&S.total>=20 },
+  { id:'ecoCity',     nm:'경제도시',        ico:'💵', ds:'경제 80 이상으로 완성.',              chk:S=>S.ended&&S.eco>=80 },
+  { id:'culCity',     nm:'문화도시',        ico:'🎭', ds:'문화 80 이상으로 완성.',              chk:S=>S.ended&&S.cul>=80 },
+  { id:'grnCity',     nm:'친환경도시',      ico:'🌲', ds:'녹지 80 이상으로 완성.',              chk:S=>S.ended&&S.grn>=80 },
+  { id:'satCity',     nm:'행복도시',        ico:'😊', ds:'만족도 80 이상으로 완성.',            chk:S=>S.ended&&S.sat>=80 },
+  { id:'balanced',    nm:'균형의 달인',     ico:'⚖️', ds:'네 지수 모두 55 이상.',               chk:S=>S.ended&&S.eco>=55&&S.cul>=55&&S.grn>=55&&S.sat>=55 },
+  { id:'dist3',       nm:'특구 도시',       ico:'🏘️', ds:'한 판에 특구 3개 완성.',              chk:S=>S.districts>=3 },
+  { id:'dist5',       nm:'특구 제국',       ico:'🏰', ds:'한 판에 특구 5개 완성.',              chk:S=>S.districts>=5 },
+  { id:'builder15',   nm:'대건설가',        ico:'🚧', ds:'한 판에 건물 15채 건설.',             chk:S=>S.built>=15 },
+  { id:'landmark',    nm:'랜드마크 건설',   ico:'🗼', ds:'랜드마크를 세우다.',                   chk:S=>S.landmarks>=1 },
+  { id:'twinTower',   nm:'쌍둥이 탑',       ico:'🏙', ds:'랜드마크 2개 건설.',                   chk:S=>S.landmarks>=2 },
+  { id:'cultureHub',  nm:'문화 메카',       ico:'🎨', ds:'도서관·박물관·미술관·문화센터 모두 건설.', chk:S=>S.cats&&S.cats.library&&S.cats.museum&&S.cats.gallery&&S.cats.culture },
+  { id:'greenThumb',  nm:'초록 손가락',     ico:'🌱', ds:'공원·식물원 보유 + 녹지 60 이상.',    chk:S=>S.cats&&S.cats.park&&S.cats.garden&&S.grn>=60 },
+  { id:'noPower',     nm:'무공해 선언',     ico:'🍃', ds:'발전소 없이 완성.',                   chk:S=>S.ended&&!(S.cats&&S.cats.power) },
+  { id:'cleanCity',   nm:'청정도시',        ico:'💨', ds:'발전소 없이 녹지 70 이상.',          chk:S=>S.ended&&S.grn>=70&&!(S.cats&&S.cats.power) },
+  { id:'rich',        nm:'부자 도시',       ico:'🤑', ds:'예산 60 이상으로 완성.',              chk:S=>S.ended&&S.budget>=60 },
+  { id:'frugal',      nm:'알뜰 시장',       ico:'🪙', ds:'투자 효율 90 이상.',                  chk:S=>S.ended&&S.invEff>=90 },
+  { id:'comeback',    nm:'역전의 명수',     ico:'↩️', ds:'오답 3+ 이지만 지수 합 240 이상.',    chk:S=>S.ended&&S.wrong>=3&&(S.eco+S.cul+S.grn+S.sat)>=240 },
+  { id:'score300',    nm:'점수 300',        ico:'🏆', ds:'최종 점수 300 돌파.',                 chk:S=>S.score>=300 },
+  { id:'score400',    nm:'점수 400',        ico:'🏆', ds:'최종 점수 400 돌파.',                 chk:S=>S.score>=400 },
+  { id:'sss',         nm:'SSS 시장',        ico:'🌟', ds:'SSS 등급 달성.',                       chk:S=>S.grade==='SSS'||S.grade==='★' },
+  { id:'golden',      nm:'황금도시',        ico:'👑', ds:'전설의 황금도시 엔딩 달성.',         chk:S=>S.endingId==='golden' },
+  { id:'relic5',      nm:'유물 빌드',       ico:'🧿', ds:'한 판에 유물 5개 이상.',              chk:S=>S.relics>=5 },
+  { id:'legend',      nm:'전설의 시장',     ico:'🎖️', ds:'도시 10회 완성(누적).',               chk:S=>S.gamesPlayed>=10 },
+  { id:'veteran',     nm:'베테랑 측량사',   ico:'🥇', ds:'도시 5회 완성(누적).',                chk:S=>S.gamesPlayed>=5 },
+  { id:'explorer',    nm:'지형 탐험가',     ico:'🗺️', ds:'서로 다른 지형 4종 경험(누적).',      chk:S=>S.cityTraitsPlayed>=4 },
+  { id:'allTerrain',  nm:'대륙 정복자',     ico:'🌍', ds:'모든 지형 경험(누적).',               chk:S=>S.cityTraitsPlayed>=CITY_TRAITS.length },
+  { id:'allMayor',    nm:'여섯 시장',       ico:'👔', ds:'모든 시장 특성 경험(누적).',          chk:S=>S.mayorTraitsPlayed>=MAYOR_TRAITS.length },
+  { id:'collector10', nm:'유물 수집가',     ico:'📦', ds:'유물 10종 수집(누적).',               chk:S=>S.relicsEver>=10 },
+  { id:'collectorAll',nm:'유물 마스터',     ico:'🏵️', ds:'모든 유물 수집(누적).',               chk:S=>S.relicsEver>=RELICS.length },
+  { id:'distAll',     nm:'특구 도감 완성',  ico:'🧩', ds:'모든 특구 발견(누적).',               chk:S=>S.districtsEver>=DISTRICTS.length },
+  { id:'endingHalf',  nm:'엔딩 수집가',     ico:'🎬', ds:'엔딩 7종 발견(누적).',                chk:S=>S.endingsEver>=7 },
+  { id:'endingAll',   nm:'엔딩 마스터',     ico:'🎞️', ds:'모든 엔딩 발견(누적).',               chk:S=>S.endingsEver>=ENDINGS.length },
+  { id:'hiddenLand',  nm:'황금 탑의 비밀',  ico:'🌅', ds:'숨겨진 랜드마크 「황금 탑」을 세우다.', chk:S=>S.hiddenLandmark },
+];
+
+/* ---- 엔딩 14종 (위에서부터 우선 판정, 첫 매칭이 채택) ---- */
+const ENDINGS = [
+  { id:'golden', grade:'★', secret:true, nm:'황금도시 건설자',
+    ds:'완벽한 측량, 흠 없는 살림, 시민의 환호. 역사에 길이 남을 황금도시를 세웠다. (상위 1~3%)',
+    cond:S=>S.wrong===0 && S.accuracy===100 && S.invEff>=92 && S.sat>=85 && S.districts>=3 && S.hiddenLandmark },
+  { id:'sss', grade:'SSS', nm:'위대한 대도시',
+    ds:'모든 면에서 빼어난 전설적 도시. 측량단의 이름이 교과서에 실렸다.',
+    cond:S=>S.score>=415 },
+  { id:'ss', grade:'SS', nm:'빛나는 도시',
+    ds:'균형과 번영을 두루 갖춘 모범 도시. 이웃 도시들이 부러워한다.',
+    cond:S=>S.score>=330 },
+  { id:'s', grade:'S', nm:'훌륭한 도시',
+    ds:'시민 모두가 자랑스러워하는 도시를 완성했다.',
+    cond:S=>S.score>=265 },
+  { id:'eco', grade:'A', nm:'경제 도시',
+    ds:'돈과 일자리가 넘치는 부유한 도시.',
+    cond:S=>S.eco>=68 && S.eco>=Math.max(S.cul,S.grn,S.sat) },
+  { id:'cul', grade:'A', nm:'문화 도시',
+    ds:'예술과 배움이 거리마다 흐르는 도시.',
+    cond:S=>S.cul>=68 && S.cul>=Math.max(S.eco,S.grn,S.sat) },
+  { id:'grn', grade:'A', nm:'친환경 도시',
+    ds:'초록빛 공원이 가득한 숨 쉬는 도시.',
+    cond:S=>S.grn>=68 && S.grn>=Math.max(S.eco,S.cul,S.sat) },
+  { id:'tour', grade:'A', nm:'관광 도시',
+    ds:'세계의 여행자가 모여드는 명소의 도시.',
+    cond:S=>(S.cul>=52&&S.sat>=52) && (S.distList&&S.distList.includes('tour')) },
+  { id:'sports',grade:'A', nm:'스포츠 도시',
+    ds:'활력이 넘치는 건강한 도시.',
+    cond:S=>S.sat>=60 && (S.distList&&S.distList.includes('sports')) },
+  { id:'happy', grade:'A', nm:'행복 도시',
+    ds:'무엇보다 시민이 즐거운 도시.',
+    cond:S=>S.sat>=68 && S.sat>=Math.max(S.eco,S.cul,S.grn) },
+  { id:'balanced',grade:'B', nm:'균형 도시',
+    ds:'어느 한쪽에 치우치지 않은 안정된 도시.',
+    cond:S=>S.eco>=46&&S.cul>=46&&S.grn>=46&&S.sat>=46 },
+  { id:'growth',grade:'B', nm:'성장 도시',
+    ds:'아직 발전 중이지만 가능성이 보이는 도시.',
+    cond:S=>S.score>=150 },
+  { id:'village',grade:'C', nm:'작은 마을',
+    ds:'소박하지만 정겨운 마을이 되었다. 다음엔 더 크게!',
+    cond:S=>S.score>=75 },
+  { id:'ghost', grade:'D', nm:'쓸쓸한 도시',
+    ds:'사람들이 떠나간 조용한 도시. 측량을 더 가다듬어 다시 도전해 보자.',
+    cond:S=>true },
+];
+
+/* ---- 이벤트 카드 ---- */
+const EVENTS = [
+  { id:'complaint', t:'주민 민원', d:'소음 민원이 빗발칩니다. 어떻게 할까요?',
+    c:[{t:'예산 들여 해결', d:'예산 -4 · 만족 +7', fx:{budget:-4,sat:7}},
+       {t:'그냥 넘긴다',   d:'만족 -5',           fx:{sat:-5}}] },
+  { id:'protest', t:'환경 시위', d:'공장 매연으로 시민들이 거리로 나왔습니다.',
+    c:[{t:'공장 규제 강화', d:'녹지 +8 · 경제 -5', fx:{grn:8,eco:-5}},
+       {t:'성장을 우선한다', d:'경제 +6 · 녹지 -6', fx:{eco:6,grn:-6}}] },
+  { id:'tourboom', t:'관광 붐', d:'우리 도시가 갑자기 인기 여행지가 되었어요!',
+    c:[{t:'관광 인프라 투자', d:'예산 -3 · 문화 +6 · 만족 +3', fx:{budget:-3,cul:6,sat:3}},
+       {t:'자연스럽게 둔다',   d:'경제 +5',                    fx:{eco:5}}] },
+  { id:'invest', t:'기업 투자', d:'대기업이 공장 부지를 찾고 있습니다.',
+    c:[{t:'적극 유치',     d:'경제 +9 · 녹지 -4', fx:{eco:9,grn:-4}},
+       {t:'정중히 거절',   d:'녹지 +3 · 만족 +3', fx:{grn:3,sat:3}}] },
+  { id:'festival', t:'지역 축제', d:'올해의 도시 축제를 어떻게 열까요?',
+    c:[{t:'성대하게 개최', d:'예산 -3 · 만족 +8', fx:{budget:-3,sat:8}},
+       {t:'소박하게 개최', d:'만족 +4',           fx:{sat:4}}] },
+  { id:'traffic', t:'교통난', d:'출퇴근 시간 도로가 마비되었습니다.',
+    c:[{t:'도로 확장',   d:'예산 -5 · 만족 +5 · 경제 +2', fx:{budget:-5,sat:5,eco:2}},
+       {t:'대중교통 확대', d:'녹지 +4 · 만족 +3',          fx:{grn:4,sat:3}}] },
+  { id:'cut', t:'예산 삭감', d:'중앙정부가 지원금을 줄였습니다. 어디를 줄일까요?',
+    c:[{t:'문화 예산 절감', d:'예산 +5 · 문화 -6', fx:{budget:5,cul:-6}},
+       {t:'복지 예산 절감', d:'예산 +5 · 만족 -6', fx:{budget:5,sat:-6}}] },
+  { id:'disaster', t:'자연재해', d:'태풍이 도시를 덮쳤습니다!',
+    c:[{t:'복구에 집중',   d:'예산 -6 · 만족 +4', fx:{budget:-6,sat:4}},
+       {t:'최소한만 대응', d:'만족 -7 · 녹지 -3', fx:{sat:-7,grn:-3}}] },
+  { id:'startup', t:'스타트업 붐', d:'젊은 창업가들이 도시로 몰려옵니다.',
+    c:[{t:'창업 지원',   d:'예산 -3 · 경제 +8', fx:{budget:-3,eco:8}},
+       {t:'관망한다',     d:'경제 +3',           fx:{eco:3}}] },
+  { id:'dust', t:'미세먼지 경보', d:'대기 질이 나빠졌습니다.',
+    c:[{t:'녹지 대폭 확대', d:'예산 -3 · 녹지 +7', fx:{budget:-3,grn:7}},
+       {t:'마스크 배포',     d:'만족 +3 · 녹지 -2', fx:{sat:3,grn:-2}}] },
+  { id:'contest', t:'문화 공모전', d:'전국 규모 예술 공모전 유치 제안이 왔습니다.',
+    c:[{t:'후원하여 유치', d:'예산 -4 · 문화 +8', fx:{budget:-4,cul:8}},
+       {t:'이번엔 불참',   d:'예산 +2',           fx:{budget:2}}] },
+  { id:'inflow', t:'인구 유입', d:'살기 좋다는 소문에 인구가 늘고 있습니다.',
+    c:[{t:'주거 확충',   d:'예산 -3 · 만족 +5', fx:{budget:-3,sat:5}},
+       {t:'현상 유지',   d:'경제 +3 · 만족 -2', fx:{eco:3,sat:-2}}] },
+];
+
+
+/* =========================================================================
+ *  [3] 유틸 & 수학 엔진 (도형 도면 SVG + 측량 문제 생성)
+ *  핵심 설계:
+ *   - 넓이(area) 부지  : 넓이를 계산 → 부지의 "개발 규모" = 건물 효과 배수가 결정됨 (넓을수록 강함)
+ *   - 둘레(perimeter)부지: 둘레를 계산 → 부지의 "유지비"가 결정됨 (둘레 길수록 매년 손해)
+ *   - 단위(unit) 부지   : ㎠↔㎡ 변환을 풀어야 진짜 규모를 알 수 있음
+ *  => 계산은 점수가 아니라 "투자 판단 정보"가 된다.
+ * ========================================================================= */
+
+/* ---- 기본 유틸 ---- */
+const rnd  = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const $  = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+/* ---- 청사진 도면 스타일 ---- */
+const BP = { fig:'#7FB0E0', fill:'rgba(127,176,224,.15)', dim:'#9FBFE0', lbl:'#E6F0FB' };
+const VBW = 300, VBH = 200;          // 도면 viewBox
+const wrapSvg = inner => `<svg viewBox="0 0 ${VBW} ${VBH}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+const T = (x, y, s, anchor='middle', size=14) =>
+  `<text x="${x}" y="${y}" fill="${BP.lbl}" font-family="ui-monospace,monospace" font-size="${size}" font-weight="700" text-anchor="${anchor}" dominant-baseline="middle">${s}</text>`;
+const fitScale = (natW, natH, maxW=150, maxH=104) => Math.min(maxW / natW, maxH / natH);
+const cx = VBW / 2, cy = VBH / 2 + 6;
+
+/* ---- 각 도형의 도면 생성기 (좌표는 viewBox 기준으로 중앙 배치) ---- */
+const SHAPE = {
+  // 직사각형: 넓이 또는 둘레용
+  rect(w, h){ const s = fitScale(w, h); const W = w*s, H = h*s, x = cx - W/2, y = cy - H/2;
+    return { svg:
+      `<rect x="${x}" y="${y}" width="${W}" height="${H}" fill="${BP.fill}" stroke="${BP.fig}" stroke-width="2.5"/>`
+      + T(cx, y - 14, `${w} m`) + `<line x1="${x}" y1="${y-6}" x2="${x+W}" y2="${y-6}" stroke="${BP.dim}" stroke-dasharray="4 3"/>`
+      + T(x - 18, cy, `${h} m`, 'middle') + `<line x1="${x-6}" y1="${y}" x2="${x-6}" y2="${y+H}" stroke="${BP.dim}" stroke-dasharray="4 3"/>`
+    }; },
+  square(sd){ return SHAPE.rect(sd, sd); },
+  // 평행사변형
+  para(b, h){ const s = fitScale(b + b*0.35, h); const B = b*s, H = h*s, off = B*0.28;
+    const x = cx - (B+off)/2, y = cy - H/2;
+    const pts = `${x+off},${y} ${x+off+B},${y} ${x+B},${y+H} ${x},${y+H}`;
+    return { svg:
+      `<polygon points="${pts}" fill="${BP.fill}" stroke="${BP.fig}" stroke-width="2.5"/>`
+      // 밑변
+      + `<line x1="${x}" y1="${y+H+8}" x2="${x+B}" y2="${y+H+8}" stroke="${BP.dim}" stroke-dasharray="4 3"/>` + T((x+x+B)/2, y+H+20, `밑변 ${b} m`)
+      // 높이(수직 점선)
+      + `<line x1="${x+off}" y1="${y}" x2="${x+off}" y2="${y+H}" stroke="${BP.dim}" stroke-dasharray="4 3"/>`
+      + `<rect x="${x+off}" y="${y+H-9}" width="9" height="9" fill="none" stroke="${BP.dim}"/>`
+      + T(x+off-26, cy, `높이`, 'middle', 12) + T(x+off-26, cy+14, `${h} m`, 'middle', 12)
+    }; },
+  // 삼각형 (넓이): 밑변 + 높이
+  triArea(b, h){ const s = fitScale(b, h); const B = b*s, H = h*s;
+    const x = cx - B/2, baseY = cy + H/2, apexX = cx - B*0.12, apexY = cy - H/2;
+    return { svg:
+      `<polygon points="${apexX},${apexY} ${x+B},${baseY} ${x},${baseY}" fill="${BP.fill}" stroke="${BP.fig}" stroke-width="2.5"/>`
+      + `<line x1="${x}" y1="${baseY+8}" x2="${x+B}" y2="${baseY+8}" stroke="${BP.dim}" stroke-dasharray="4 3"/>` + T(cx, baseY+20, `밑변 ${b} m`)
+      + `<line x1="${apexX}" y1="${apexY}" x2="${apexX}" y2="${baseY}" stroke="${BP.dim}" stroke-dasharray="4 3"/>`
+      + `<rect x="${apexX}" y="${baseY-9}" width="9" height="9" fill="none" stroke="${BP.dim}"/>`
+      + T(apexX-24, (apexY+baseY)/2, `높이`,'middle',12) + T(apexX-24,(apexY+baseY)/2+14,`${h} m`,'middle',12)
+    }; },
+  // 사다리꼴: 윗변/아랫변/높이
+  trap(top, bot, h){ const s = fitScale(bot, h); const Tp = top*s, Bt = bot*s, H = h*s;
+    const by = cy + H/2, ty = cy - H/2, bx = cx - Bt/2, txc = cx - Tp/2;
+    return { svg:
+      `<polygon points="${txc},${ty} ${txc+Tp},${ty} ${bx+Bt},${by} ${bx},${by}" fill="${BP.fill}" stroke="${BP.fig}" stroke-width="2.5"/>`
+      + `<line x1="${txc}" y1="${ty-8}" x2="${txc+Tp}" y2="${ty-8}" stroke="${BP.dim}" stroke-dasharray="4 3"/>` + T(cx, ty-18, `윗변 ${top} m`,'middle',12)
+      + `<line x1="${bx}" y1="${by+8}" x2="${bx+Bt}" y2="${by+8}" stroke="${BP.dim}" stroke-dasharray="4 3"/>` + T(cx, by+20, `아랫변 ${bot} m`,'middle',12)
+      + `<line x1="${bx-6}" y1="${ty}" x2="${bx-6}" y2="${by}" stroke="${BP.dim}" stroke-dasharray="4 3"/>`
+      + T(bx-22, cy, `높이`,'middle',12) + T(bx-22, cy+14, `${h} m`,'middle',12)
+    }; },
+  // 마름모: 대각선 두 개
+  rhombus(d1, d2){ const s = fitScale(d1, d2); const A = d1*s/2, B = d2*s/2;
+    return { svg:
+      `<polygon points="${cx},${cy-B} ${cx+A},${cy} ${cx},${cy+B} ${cx-A},${cy}" fill="${BP.fill}" stroke="${BP.fig}" stroke-width="2.5"/>`
+      + `<line x1="${cx-A}" y1="${cy}" x2="${cx+A}" y2="${cy}" stroke="${BP.dim}" stroke-dasharray="4 3"/>`
+      + `<line x1="${cx}" y1="${cy-B}" x2="${cx}" y2="${cy+B}" stroke="${BP.dim}" stroke-dasharray="4 3"/>`
+      + T(cx+A+4, cy-12, `${d1} m`,'start',12) + T(cx+10, cy-B+2, `${d2} m`,'start',12)
+    }; },
+  // 삼각형(둘레): 세 변
+  triPeri(a, b, c){ const s = fitScale(c, c*0.7); const C = c*s;
+    const x = cx - C/2, baseY = cy + C*0.32, apexX = cx - C*0.05, apexY = cy - C*0.33;
+    return { svg:
+      `<polygon points="${apexX},${apexY} ${x+C},${baseY} ${x},${baseY}" fill="${BP.fill}" stroke="${BP.fig}" stroke-width="2.5"/>`
+      + T(cx, baseY+18, `${c} m`) + T((x+apexX)/2-16, (baseY+apexY)/2, `${a} m`,'end',12) + T((x+C+apexX)/2+16, (baseY+apexY)/2, `${b} m`,'start',12)
+    }; },
+  // 정다각형(둘레): n개의 같은 변
+  regular(n, side){ const R = 58, pts = [];
+    for (let i = 0; i < n; i++){ const ang = -Math.PI/2 + i*2*Math.PI/n; pts.push(`${cx + R*Math.cos(ang)},${cy + R*Math.sin(ang)}`); }
+    return { svg:
+      `<polygon points="${pts.join(' ')}" fill="${BP.fill}" stroke="${BP.fig}" stroke-width="2.5"/>`
+      + T(cx, cy, `정${n}각형`,'middle',13) + T(cx, cy + R + 18, `한 변 ${side} m`)
+    }; },
+  // ㄱ자(L)형 부지(둘레): 6변
+  lshape(a, b, c, d){ // 외곽 가로 a, 세로 b, 안쪽 가로 c, 세로 d
+    const s = fitScale(a, b, 130, 96); const A=a*s,B=b*s,C=c*s,D=d*s;
+    const x = cx - A/2, y = cy - B/2;
+    const pts = `${x},${y} ${x+A},${y} ${x+A},${y+D} ${x+C},${y+D} ${x+C},${y+B} ${x},${y+B}`;
+    return { svg:
+      `<polygon points="${pts}" fill="${BP.fill}" stroke="${BP.fig}" stroke-width="2.5"/>`
+      + T(x+A/2, y-12, `${a} m`,'middle',12) + T(x-14, y+B/2, `${b} m`,'middle',12)
+      + T(x+A+14, y+D/2, `${d} m`,'start',12) + T(x+C/2, y+B+14, `${c} m`,'middle',12)
+    }; },
+};
+
+/* ---- 측량 문제(부지) 생성 ----
+ *  반환: { kind, sub, svg, prompt, answer, unit, formula, area, peri, sizeFactor, upkeep, name }
+ *  kind: 'area' | 'perimeter' | 'unit'
+ */
+const PLOT_NAMES = {
+  area: ['강변 삼각 부지','중앙 사다리꼴 부지','언덕 평행사변형 부지','보석 마름모 부지','광장 직사각 부지','반듯한 정사각 부지'],
+  perimeter: ['외곽 경계 부지','울타리 부지','다각형 공터','경계가 긴 부지'],
+  unit: ['옛 등기 부지','㎠ 표기 부지'],
+};
+
+function makeAreaPlot(){
+  const t = pick(['triangle','para','trap','rhombus','rect','square']);
+  let svg, prompt, answer, formula, sub, shapeKey = t;
+  if (t === 'triangle'){ let b = rnd(6,20), h = rnd(4,16); if ((b*h) % 2) b++; svg = SHAPE.triArea(b,h).svg;
+    answer = b*h/2; prompt = `삼각형 부지의 넓이는?`; formula = `밑변 × 높이 ÷ 2 = ${b} × ${h} ÷ 2`; sub='삼각형'; }
+  else if (t === 'para'){ let b = rnd(6,18), h = rnd(4,14); svg = SHAPE.para(b,h).svg;
+    answer = b*h; prompt = `평행사변형 부지의 넓이는?`; formula = `밑변 × 높이 = ${b} × ${h}`; sub='평행사변형'; }
+  else if (t === 'trap'){ let a = rnd(5,13), b = a + rnd(2,10), h = rnd(4,12); if (((a+b)*h)%2) h = (h%2? h+1 : h); if (((a+b)*h)%2) b++; svg = SHAPE.trap(a,b,h).svg;
+    answer = (a+b)*h/2; prompt = `사다리꼴 부지의 넓이는?`; formula = `(윗변 + 아랫변) × 높이 ÷ 2 = (${a} + ${b}) × ${h} ÷ 2`; sub='사다리꼴'; }
+  else if (t === 'rhombus'){ let d1 = rnd(6,20), d2 = rnd(6,20); if ((d1*d2)%2) d1++; svg = SHAPE.rhombus(d1,d2).svg;
+    answer = d1*d2/2; prompt = `마름모 부지의 넓이는?`; formula = `대각선 × 대각선 ÷ 2 = ${d1} × ${d2} ÷ 2`; sub='마름모'; }
+  else if (t === 'rect'){ let w = rnd(5,18), h = rnd(4,14); svg = SHAPE.rect(w,h).svg;
+    answer = w*h; prompt = `직사각형 부지의 넓이는?`; formula = `가로 × 세로 = ${w} × ${h}`; sub='직사각형'; }
+  else { let sd = rnd(4,14); svg = SHAPE.square(sd).svg;
+    answer = sd*sd; prompt = `정사각형 부지의 넓이는?`; formula = `한 변 × 한 변 = ${sd} × ${sd}`; sub='정사각형'; }
+  const area = answer;
+  return { kind:'area', sub, shapeKey, svg, prompt, answer, unit:'㎡', formula,
+    area, peri: Math.round(Math.sqrt(area)*3.6), name: pick(PLOT_NAMES.area) };
+}
+
+function makePerimeterPlot(){
+  const t = pick(['rect','square','tri','penta','hexa','lshape']);
+  let svg, answer, formula, sub;
+  if (t === 'rect'){ const w = rnd(5,18), h = rnd(4,14); svg = SHAPE.rect(w,h).svg;
+    answer = 2*(w+h); formula = `(가로 + 세로) × 2 = (${w} + ${h}) × 2`; sub='직사각형'; }
+  else if (t === 'square'){ const s = rnd(4,15); svg = SHAPE.square(s).svg;
+    answer = 4*s; formula = `한 변 × 4 = ${s} × 4`; sub='정사각형'; }
+  else if (t === 'tri'){ const a = rnd(6,14), b = rnd(6,14), c = rnd(Math.max(a,b)-3, a+b-2); svg = SHAPE.triPeri(a,b,c).svg;
+    answer = a+b+c; formula = `세 변의 합 = ${a} + ${b} + ${c}`; sub='삼각형'; }
+  else if (t === 'penta'){ const s = rnd(4,12); svg = SHAPE.regular(5,s).svg;
+    answer = 5*s; formula = `한 변 × 5 = ${s} × 5`; sub='정오각형'; }
+  else if (t === 'hexa'){ const s = rnd(4,11); svg = SHAPE.regular(6,s).svg;
+    answer = 6*s; formula = `한 변 × 6 = ${s} × 6`; sub='정육각형'; }
+  else { const a = rnd(10,16), b = rnd(8,14), c = rnd(4, a-3), d = rnd(3, b-3); svg = SHAPE.lshape(a,b,c,d).svg;
+    answer = a + b + c + d + (a-c) + (b-d); formula = `여섯 변을 모두 더하면`; sub='ㄱ자형'; }
+  const peri = answer;
+  return { kind:'perimeter', sub, shapeKey:t, svg, prompt:`이 부지의 둘레는?`, answer, unit:'m', formula,
+    area: rnd(60,90), peri, name: pick(PLOT_NAMES.perimeter) };
+}
+
+function makeUnitPlot(){
+  const dir = Math.random() < 0.62 ? 'c2m' : 'm2c';
+  let prompt, answer, unit, formula, sub, realArea;
+  // 보기용 도면(직사각형)
+  const w = rnd(5,16), h = rnd(4,12); const svg = SHAPE.rect(w,h).svg;
+  if (dir === 'c2m'){ realArea = rnd(20,170); const cm2 = realArea * 10000;
+    prompt = `등기부에 ${cm2.toLocaleString()} ㎠ 로 적혀 있다. ㎡로 고치면?`;
+    answer = realArea; unit='㎡'; formula = `1 ㎡ = 10000 ㎠ → ${cm2.toLocaleString()} ÷ 10000`; sub='㎠ → ㎡'; }
+  else { realArea = rnd(2,9); prompt = `이 부지는 ${realArea} ㎡ 다. ㎠로 고치면?`;
+    answer = realArea * 10000; unit='㎠'; formula = `1 ㎡ = 10000 ㎠ → ${realArea} × 10000`; sub='㎡ → ㎠'; }
+  return { kind:'unit', sub, shapeKey:'rect', svg, prompt, answer, unit, formula,
+    area: realArea, peri: Math.round(Math.sqrt(realArea)*3.6), name: pick(PLOT_NAMES.unit) };
+}
+
+/* 부지 1개 생성 (종류 가중치) */
+function generatePlot(){
+  const r = Math.random();
+  let p;
+  if (r < 0.60) p = makeAreaPlot();
+  else if (r < 0.86) p = makePerimeterPlot();
+  else p = makeUnitPlot();
+  // 개발 규모(건물 효과 배수) & 유지비 산출
+  p.sizeFactor = clamp(0.6 + p.area / 140, 0.6, 1.75);
+  p.upkeep = +(p.peri * CFG.UPKEEP_RATE).toFixed(1);
+  return p;
+}
+
+
+/* =========================================================================
+ *  [4] 상태 / 저장 / 핵심 게임 로직
+ * ========================================================================= */
+
+/* ---- 영구 저장(도감) ---- */
+const SAVE_KEY = 'goldencity_save_v1';
+function defaultSave(){ return { achievements:{}, endings:{}, districts:{}, relics:{},
+  gamesPlayed:0, bestScore:0, goldenCount:0, cityTraitsPlayed:{}, mayorTraitsPlayed:{} }; }
+function load(){ try { return Object.assign(defaultSave(), JSON.parse(localStorage.getItem(SAVE_KEY)) || {}); }
+  catch(e){ return defaultSave(); } }
+function save(s){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch(e){} }
+const has = id => G.relics.includes(id);   // 유물 보유 여부 단축
+
+/* ---- 현재 게임 상태 ---- */
+let G = null;
+function freshGame(){
+  return {
+    year:0, budget:CFG.START_BUDGET,
+    idx:{ eco:0, cul:0, grn:0, sat:0 },
+    city:null, mayor:null,
+    relics:[], buildings:[], catCount:{},
+    tiles:new Array(CFG.GRID).fill(null),
+    districts:[],
+    stats:{ correct:0, wrong:0, total:0, streak:0, maxStreak:0,
+            kArea:0, kPeri:0, kUnit:0,
+            sTriangle:0, sParallelogram:0, sTrapezoid:0, sRhombus:0,
+            spent:0, valueGained:0, totalTime:0 },
+    flags:{ smartCharge:false, goldVeinLvl:0, hiddenLandmark:false, builtGoldTower:false },
+    plots:[], activePlot:null, phase:'survey',
+  };
+}
+
+/* ---- 지수 변경(0~100 고정) ---- */
+function addIndex(k, v){ G.idx[k] = clamp(G.idx[k] + v, 0, 100); }
+function applyFx(fx, festivalBoost=true){
+  for (const k in fx){
+    if (k === 'budget'){ G.budget = Math.max(0, G.budget + fx.budget); continue; }
+    let v = fx[k];
+    if (festivalBoost && k === 'sat' && v > 0 && has('festival')) v = Math.round(v * 1.5);
+    addIndex(k, v);
+  }
+}
+
+/* =================== 게임 시작 / 셋업 =================== */
+let setupCityChoices = [], setupMayorChoices = [];
+function startNewGame(){
+  G = freshGame();
+  setupCityChoices = shuffle(CITY_TRAITS).slice(0, 3);
+  showScreen('screen-setup');
+  renderSetup('city');
+}
+function chooseCity(trait){
+  G.city = trait;
+  setupMayorChoices = shuffle(MAYOR_TRAITS).slice(0, 4);
+  renderSetup('mayor');
+}
+function chooseMayor(trait){
+  G.mayor = trait;
+  for (const k in (trait.start || {})) addIndex(k, trait.start[k]);
+  if (trait.bonusBudget) G.budget += trait.bonusBudget;
+  showScreen('screen-game');
+  $('#cityName').textContent = G.city.nm;
+  renderHud(); renderCity();
+  advanceYear();
+}
+
+/* =================== 턴 진행 =================== */
+function advanceYear(){
+  G.year++;
+  if (G.year > CFG.TOTAL_YEARS){ return endGame(); }
+  renderHud();
+  if (CFG.RELIC_YEARS.includes(G.year)) relicPhase();
+  else surveyPhase();
+}
+
+/* ---- 유물 선택 단계 ---- */
+function relicPhase(){
+  const pool = shuffle(RELICS.filter(r => !has(r.id))).slice(0, 3);
+  if (pool.length === 0){ surveyPhase(); return; }
+  setPrompt('유물 발굴', '측량단의 보물 창고에서 하나를 고르세요. 빌드의 방향이 됩니다.', 'RELIC YEAR');
+  const area = $('#cardArea'); area.innerHTML = '';
+  pool.forEach((r, i) => {
+    const el = document.createElement('div');
+    el.className = 'card relic'; el.style.animationDelay = (i*0.06)+'s';
+    el.innerHTML = `
+      <div class="ribbon"><span>유물 · RELIC</span><span>${r.ico}</span></div>
+      <div class="card-body">
+        <div class="ttl">${r.ico} ${r.nm}</div>
+        <div class="meta" style="min-height:44px;">${r.ds}</div>
+        <button class="card-cta">획득하기</button>
+      </div>`;
+    el.querySelector('.card-cta').onclick = () => acquireRelic(r);
+    area.appendChild(el);
+  });
+  $('#turnFoot').innerHTML = '';
+}
+function acquireRelic(r){
+  G.relics.push(r.id);
+  const sv = load(); sv.relics[r.id] = true; save(sv);
+  if (r.id === 'cornerstone') G.budget += 10;
+  if (r.id === 'seal') INDEX_KEYS.forEach(k => addIndex(k, 4));
+  toast(`유물 획득: ${r.ico} ${r.nm}`, 'gold');
+  evalAchievements(buildS(false));
+  renderHud();
+  surveyPhase();
+}
+
+/* ---- 측량(토지 선택) 단계 ---- */
+function surveyPhase(){
+  G.phase = 'survey'; G.activePlot = null;
+  const count = 3 + (has('doubleDeed') ? 1 : 0);
+  G.plots = Array.from({ length: count }, generatePlot);
+  setPrompt('땅을 측량하세요', '도면을 보고 넓이·둘레를 계산하면 진짜 가치가 드러납니다. 가장 좋은 땅에 개발하세요.', `YEAR ${G.year} · 측량`);
+  renderPlots();
+  $('#turnFoot').innerHTML = `<button class="btn btn-ghost btn-block" id="skipBtn">올해는 건설을 쉰다</button>`;
+  $('#skipBtn').onclick = skipYear;
+}
+function skipYear(){
+  if (has('landBank')){ G.budget += 6; toast('토지은행: 예산 +6', 'grn'); }
+  resolveEndOfYear();
+}
+
+/* ---- 측량 계산 모달 ---- */
+let calcCtx = null;
+function openSurvey(plot){
+  calcCtx = { plot, t0: Date.now() };
+  $('#calcHeadLabel').textContent = plot.kind === 'unit' ? '단위 변환' : (plot.kind === 'perimeter' ? '둘레 측량' : '넓이 측량');
+  $('#calcHeadRight').textContent = plot.name;
+  $('#calcTitle').textContent = plot.name;
+  $('#calcShape').innerHTML = wrapSvg(plot.svg);
+  $('#calcText').innerHTML = plot.prompt;
+  $('#calcUnit').textContent = plot.unit;
+  $('#calcInput').value = '';
+  $('#calcHint').textContent = `공식: ${plot.formula}`;
+  $('#calcFeedback').className = 'q-feedback';
+  $('#calcSubmit').textContent = '확인';
+  $('#calcSubmit').onclick = submitSurvey;
+  showOverlay('overlayCalc');
+  setTimeout(() => $('#calcInput').focus(), 100);
+}
+function submitSurvey(){
+  const plot = calcCtx.plot;
+  const raw = $('#calcInput').value.trim();
+  if (raw === '') { $('#calcInput').focus(); return; }
+  const val = Number(raw);
+  let correct = val === plot.answer;
+  const fb = $('#calcFeedback');
+
+  // 단위 변환기 유물: 단위 문제 자동 정답
+  if (!correct && plot.kind === 'unit' && has('unitMaster')) correct = true;
+  // 스마트 측정기: 첫 오답 1회 무효
+  let saved = false;
+  if (!correct && has('smartMeter') && !G.flags.smartCharge){ correct = true; saved = true; G.flags.smartCharge = true; }
+
+  G.stats.total++;
+  G.stats.totalTime += (Date.now() - calcCtx.t0) / 1000;
+
+  if (correct){
+    G.stats.correct++;
+    G.stats.streak += has('banner') ? 2 : 1;
+    G.stats.maxStreak = Math.max(G.stats.maxStreak, G.stats.streak);
+    if (plot.kind === 'area') G.stats.kArea++;
+    else if (plot.kind === 'perimeter') G.stats.kPeri++;
+    else G.stats.kUnit++;
+    if (plot.sub === '삼각형') G.stats.sTriangle++;
+    if (plot.sub === '평행사변형') G.stats.sParallelogram++;
+    if (plot.sub === '사다리꼴') G.stats.sTrapezoid++;
+    if (plot.sub === '마름모') G.stats.sRhombus++;
+
+    plot.surveyed = true; plot.correct = true;
+    plot.precision = CFG.PRECISION_BONUS + (G.mayor.planner ? 0.10 : 0) + (has('tape') ? 0.10 : 0);
+    if (has('license')) addIndex('sat', 1);
+    if (has('goldenRuler') && plot.kind === 'area'){ G.budget += 3; }
+    if (has('compass') && plot.kind === 'perimeter') plot.upkeepMult = 0.7;
+
+    fb.className = 'q-feedback ok';
+    fb.textContent = saved ? `정답! (스마트 측정기가 도와줬어요) 정밀 측량 보너스 +${Math.round(plot.precision*100)}%`
+                           : `정답! 정밀 측량 성공 — 건물 효과 +${Math.round(plot.precision*100)}%`;
+  } else {
+    G.stats.wrong++; G.stats.streak = 0;
+    plot.surveyed = true; plot.correct = false; plot.precision = 0;
+    fb.className = 'q-feedback no';
+    fb.textContent = `아쉬워요. 정답은 ${plot.answer.toLocaleString()} ${plot.unit}. 그래도 대략적인 정보로 개발할 수 있어요.`;
+  }
+  $('#calcSubmit').textContent = '닫기';
+  $('#calcSubmit').onclick = () => { hideOverlay('overlayCalc'); renderPlots(); evalAchievements(buildS(false)); };
+  renderHud();
+}
+
+/* ---- 부지 → 건설 단계 ---- */
+function chooseToBuild(plot){
+  G.activePlot = plot; G.phase = 'build';
+  const opts = shuffle(BUILDINGS).slice(0, 5);
+  // 숨겨진 랜드마크: 후반 + 도시가 무르익으면 「황금 탑」 등장
+  const sum = G.idx.eco + G.idx.cul + G.idx.grn + G.idx.sat;
+  if (G.year >= 14 && sum >= 200 && !G.flags.builtGoldTower){
+    opts.push({ id:'goldtower', nm:'황금 탑', ico:'🌅', cat:'landmark', cost:16, up:1.4,
+      base:{ eco:8, cul:8, grn:6, sat:10 }, special:true });
+  }
+  setPrompt(`「${plot.name}」개발`, '이 땅에 세울 건물을 고르세요. 넓은 땅일수록 효과가 커집니다.', `YEAR ${G.year} · 건설`);
+  renderBuildOptions(plot, opts);
+  $('#turnFoot').innerHTML = `<button class="btn btn-ghost btn-block" id="backSurvey">← 다른 땅 보기</button>`;
+  $('#backSurvey').onclick = surveyPhase;
+}
+
+/* 건물 효과 계산(부지 규모·정밀보너스·지형·유물 반영) */
+function computeBuild(plot, b){
+  let m = plot.sizeFactor * (1 + (plot.precision || 0));
+  const C = G.city.mod, cat = b.cat;
+  if ((cat === 'park' || cat === 'garden') && C.parkBonus) m *= 1 + C.parkBonus;
+  if (cat === 'harbor' && C.harborBonus) m *= 1 + C.harborBonus;
+  if ((cat === 'lab' || cat === 'complex') && C.techBonus) m *= 1 + C.techBonus;
+  if (C.bigLandBonus && plot.area > 120) m *= 1.3;
+  if (has('whitePaper') && ['library','museum','gallery','culture'].includes(cat)) m *= 1.6;
+  if (has('greenBudget') && (cat === 'park' || cat === 'garden')) m *= 1.6;
+  if (has('heritage') && (cat === 'museum' || cat === 'gallery')) m *= 1.5;
+  if (has('archive') && cat === 'library') m *= 1.6;
+  if (has('square') && (plot.shapeKey === 'rect' || plot.shapeKey === 'square')) m *= 1.3;
+  if (has('triangle') && (plot.shapeKey === 'triangle' || plot.shapeKey === 'tri')) m *= 1.35;
+  if (has('rhombus') && plot.shapeKey === 'rhombus') m *= 1.45;
+  const eff = { eco:0, cul:0, grn:0, sat:0 };
+  for (const k of INDEX_KEYS){
+    let v = b.base[k] || 0; if (!v) continue;
+    let mm = m;
+    if (k === 'eco' && C.ecoBuildBonus && v > 0) mm *= 1 + C.ecoBuildBonus;
+    if (k === 'cul' && C.culBuildBonus && v > 0) mm *= 1 + C.culBuildBonus;
+    if (k === 'grn' && C.grnBonus && v > 0) mm *= 1 + C.grnBonus;
+    if (k === 'sat' && C.satBonus && v > 0) mm *= 1 + C.satBonus;
+    if (k === 'sat' && has('magnet')) mm *= 1.35;
+    eff[k] = Math.round(v * mm * 0.5);
+  }
+  if (cat === 'power' && has('solar')){ eff.grn = Math.max(0, eff.grn); eff.eco += 4; }
+  return eff;
+}
+function buildCost(b){
+  let mult = 1 - (has('stamp') ? 0.2 : 0) - (has('quarry') ? 0.1 : 0);
+  return Math.max(1, Math.round(b.cost * mult));
+}
+function buildUpkeep(plot, b){
+  const C = G.city.mod;
+  let u = plot.upkeep * b.up * (1 + (C.upkeepMul || 0)) * (plot.upkeepMult || 1);
+  if (has('cleanTech')) u *= 0.82;
+  if (has('quarry')) u *= 0.9;
+  return +clamp(u, 0.4, 4.5).toFixed(1);
+}
+
+function develop(plot, b){
+  const cost = buildCost(b);
+  if (G.budget < cost) return;
+  G.budget -= cost; G.stats.spent += cost;
+  if (has('patron') && ['library','museum','gallery','culture'].includes(b.cat)) G.budget += Math.round(cost * 0.3);
+
+  const eff = computeBuild(plot, b);
+  INDEX_KEYS.forEach(k => { addIndex(k, eff[k]); if (eff[k] > 0) G.stats.valueGained += eff[k]; });
+  const upkeep = buildUpkeep(plot, b);
+
+  G.buildings.push({ id: b.id, nm: b.nm, ico: b.ico, cat: b.cat, eff, upkeep });
+  G.catCount[b.cat] = (G.catCount[b.cat] || 0) + 1;
+  placeTile(b.ico);
+  if (b.special){ G.flags.builtGoldTower = true; G.flags.hiddenLandmark = true; toast('숨겨진 랜드마크 「황금 탑」 완공!', 'gold'); }
+
+  checkDistricts();
+  flashBudget('bad');
+  renderHud(); renderCity();
+  evalAchievements(buildS(false));
+  resolveEndOfYear();
+}
+
+/* ---- 특구 완성 검사 ---- */
+function checkDistricts(){
+  for (const d of DISTRICTS){
+    if (G.districts.includes(d.id)) continue;
+    const ok = Object.entries(d.req).every(([cat, n]) => (G.catCount[cat] || 0) >= n);
+    if (ok){
+      G.districts.push(d.id);
+      let bonus = Object.assign({}, d.bonus);
+      const mult = (has('masterPlan') ? 1.6 : 1) * 0.45;
+      INDEX_KEYS.forEach(k => { if (bonus[k]) addIndex(k, Math.round(bonus[k] * mult)); });
+      const sv = load(); sv.districts[d.id] = true; save(sv);
+      queueUnlock('특구 완성', d.ico, d.nm, d.ds);
+    }
+  }
+}
+
+/* ---- 한 해 마무리: 수입/유지비/이벤트 ---- */
+function resolveEndOfYear(){
+  // 수입
+  let income = CFG.BASE_INCOME + Math.floor(G.idx.eco / CFG.ECO_INCOME_DIV) + Math.floor(G.idx.sat / 10) + Math.floor(G.idx.cul / 12);
+  if (has('taxLedger')) income += 3;
+  if (has('ecoCharter') && G.idx.grn >= 50) income += 2;
+  if (has('goldVein') && G.stats.wrong === 0){ G.flags.goldVeinLvl++; income += G.flags.goldVeinLvl; }
+  // 유지비
+  const upkeep = G.buildings.reduce((s, b) => s + b.upkeep, 0);
+  const net = income - upkeep;
+  G.budget = Math.max(0, G.budget + net);
+  if (net < 0 && G.budget === 0) addIndex('sat', -2);
+  if (has('citizen') && G.idx.sat >= 60) INDEX_KEYS.forEach(k => addIndex(k, 1));
+  if (net !== 0) toast(`결산: 수입 ${income} − 유지비 ${upkeep.toFixed(1)} = ${net >= 0 ? '+' : ''}${net.toFixed(1)}`, net >= 0 ? 'grn' : 'bad');
+  if (net >= 0) flashBudget('good');
+  renderHud();
+
+  // 이벤트(중간 해에만 확률 발생)
+  if (G.year >= 2 && G.year <= CFG.TOTAL_YEARS - 1 && Math.random() < CFG.EVENT_CHANCE){
+    showEvent(pick(EVENTS));
+  } else {
+    advanceYear();
+  }
+}
+
+/* ---- 이벤트 모달 ---- */
+function showEvent(ev){
+  $('#evTitle').textContent = ev.t;
+  $('#evDesc').textContent = ev.d;
+  const box = $('#evChoices'); box.innerHTML = '';
+  ev.c.forEach(ch => {
+    const el = document.createElement('button');
+    el.className = 'event-choice';
+    el.innerHTML = `<div class="ec-t">${ch.t}</div><div class="ec-d">${ch.d}</div>`;
+    el.onclick = () => { applyFx(ch.fx); hideOverlay('overlayEvent'); renderHud(); evalAchievements(buildS(false)); advanceYear(); };
+    box.appendChild(el);
+  });
+  showOverlay('overlayEvent');
+}
+
+
+/* =========================================================================
+ *  [5] 엔딩 / 점수 / 업적판정 / UI 렌더링
+ * ========================================================================= */
+
+/* ---- 통계 객체 S 구성 (업적·엔딩 판정 입력) ---- */
+function buildS(ended){
+  const sv = load(), idx = G.idx, cats = {};
+  G.buildings.forEach(b => cats[b.cat] = (cats[b.cat] || 0) + 1);
+  const total = G.stats.total, correct = G.stats.correct, wrong = G.stats.wrong;
+  const accuracy = total ? Math.round(correct / total * 100) : 0;
+  const invEff = clamp(Math.round(G.stats.valueGained / Math.max(G.stats.spent, 1) * 48), 0, 100);
+  const distList = G.districts.slice();
+  const score = Math.round((idx.eco + idx.cul + idx.grn + idx.sat) * 0.6)
+    + distList.length * 7 + Math.round(accuracy / 100 * 90) + Math.round(invEff / 100 * 60)
+    + G.relics.length * 3 + (G.flags.hiddenLandmark ? 40 : 0);
+  return {
+    ended, year:G.year, budget:Math.round(G.budget),
+    eco:idx.eco, cul:idx.cul, grn:idx.grn, sat:idx.sat,
+    correct, wrong, total, accuracy, maxStreak:G.stats.maxStreak,
+    kArea:G.stats.kArea, kPeri:G.stats.kPeri, kUnit:G.stats.kUnit,
+    sTriangle:G.stats.sTriangle, sParallelogram:G.stats.sParallelogram,
+    sTrapezoid:G.stats.sTrapezoid, sRhombus:G.stats.sRhombus,
+    districts:distList.length, distList, relics:G.relics.length, built:G.buildings.length,
+    landmarks:cats.landmark || 0, cats, invEff, score, grade:'', endingId:'',
+    hiddenLandmark:G.flags.hiddenLandmark,
+    gamesPlayed:sv.gamesPlayed || 0,
+    relicsEver:Object.keys(sv.relics || {}).length,
+    districtsEver:Object.keys(sv.districts || {}).length,
+    endingsEver:Object.keys(sv.endings || {}).length,
+    cityTraitsPlayed:Object.keys(sv.cityTraitsPlayed || {}).length,
+    mayorTraitsPlayed:Object.keys(sv.mayorTraitsPlayed || {}).length,
+  };
+}
+
+/* ---- 업적 판정 ---- */
+function evalAchievements(S){
+  const sv = load(); let changed = false;
+  for (const a of ACHIEVEMENTS){
+    if (sv.achievements[a.id]) continue;
+    let ok = false; try { ok = a.chk(S); } catch(e){ ok = false; }
+    if (ok){ sv.achievements[a.id] = true; changed = true; toast(`업적 달성: ${a.ico} ${a.nm}`, 'gold'); }
+  }
+  if (changed) save(sv);
+}
+
+/* ---- 게임 종료 ---- */
+function endGame(){
+  let S = buildS(true);
+  const ending = ENDINGS.find(e => { try { return e.cond(S); } catch(err){ return false; } }) || ENDINGS[ENDINGS.length - 1];
+  S.endingId = ending.id; S.grade = ending.grade;
+
+  // 영구 저장 갱신
+  const sv = load();
+  sv.gamesPlayed = (sv.gamesPlayed || 0) + 1;
+  sv.cityTraitsPlayed[G.city.id] = true;
+  sv.mayorTraitsPlayed[G.mayor.id] = true;
+  sv.endings[ending.id] = true;
+  G.relics.forEach(r => sv.relics[r] = true);
+  G.districts.forEach(d => sv.districts[d] = true);
+  sv.bestScore = Math.max(sv.bestScore || 0, S.score);
+  if (ending.id === 'golden') sv.goldenCount = (sv.goldenCount || 0) + 1;
+  save(sv);
+
+  // 갱신된 누적치로 업적 재판정
+  S = Object.assign(buildS(true), { endingId:ending.id, grade:ending.grade });
+  evalAchievements(S);
+
+  renderResult(S, ending);
+  showScreen('screen-result');
+}
+
+/* ---- 결과 화면 ---- */
+function renderResult(S, ending){
+  const sv = load();
+  const avgTime = S.total ? (G.stats.totalTime / S.total).toFixed(1) : '0';
+  const relicChips = G.relics.map(id => `<span class="chip">${RELIC_MAP[id].ico} ${RELIC_MAP[id].nm}</span>`).join('') || '<span class="chip">없음</span>';
+  const distChips = G.districts.map(id => { const d = DISTRICTS.find(x => x.id === id); return `<span class="chip">${d.ico} ${d.nm}</span>`; }).join('') || '<span class="chip">없음</span>';
+  const tiles = G.tiles.map(t => `<div class="tile ${t ? 'filled' : ''}">${t ? t.ico : ''}</div>`).join('');
+  const totalAch = ACHIEVEMENTS.length, gotAch = Object.keys(sv.achievements).length;
+
+  $('#resultWrap').innerHTML = `
+    <div class="ending-hero ${ending.secret ? 'secret' : ''}">
+      <div class="grade">${ending.grade}</div>
+      <div class="e-nm">${ending.nm}</div>
+      <div class="e-ds">${ending.ds}</div>
+    </div>
+    <div class="final-city">
+      <div class="ph">${G.city.nm} · 20년 후의 전경</div>
+      <div class="city-grid">${tiles}</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-cell"><div class="sv">${S.score}</div><div class="sl">최종 점수</div></div>
+      <div class="stat-cell"><div class="sv">${S.accuracy}%</div><div class="sl">측량 정답률</div></div>
+      <div class="stat-cell"><div class="sv">${S.wrong}</div><div class="sl">오답 수</div></div>
+      <div class="stat-cell"><div class="sv">${avgTime}초</div><div class="sl">평균 풀이시간</div></div>
+      <div class="stat-cell"><div class="sv">${S.invEff}</div><div class="sl">투자 효율</div></div>
+      <div class="stat-cell"><div class="sv">${S.districts}</div><div class="sl">완성 특구</div></div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-cell"><div class="sv" style="color:var(--eco)">${S.eco}</div><div class="sl">경제</div></div>
+      <div class="stat-cell"><div class="sv" style="color:var(--cul)">${S.cul}</div><div class="sl">문화</div></div>
+      <div class="stat-cell"><div class="sv" style="color:var(--grn)">${S.grn}</div><div class="sl">녹지</div></div>
+      <div class="stat-cell"><div class="sv" style="color:var(--sat)">${S.sat}</div><div class="sl">만족도</div></div>
+    </div>
+    <div class="result-section-h">획득 특구</div><div class="chip-row">${distChips}</div>
+    <div class="result-section-h">보유 유물</div><div class="chip-row">${relicChips}</div>
+    <div class="result-section-h">업적 진행도 · ${gotAch} / ${totalAch}</div>
+    <div class="chip-row"><span class="chip">🏆 최고 점수 ${sv.bestScore}</span><span class="chip">🏙️ 완성 ${sv.gamesPlayed}회</span>${sv.goldenCount ? `<span class="chip">👑 황금도시 ${sv.goldenCount}회</span>` : ''}</div>
+    <div style="display:flex;gap:10px;margin-top:22px;">
+      <button class="btn btn-gold" style="flex:1" id="resAgain">다시 측량</button>
+      <button class="btn btn-ghost" style="flex:1" id="resCodex">도감</button>
+      <button class="btn btn-ghost" style="flex:1" id="resTitle">타이틀</button>
+    </div>`;
+  $('#resAgain').onclick = startNewGame;
+  $('#resCodex').onclick = () => { renderCodex('ach'); showScreen('screen-codex'); };
+  $('#resTitle').onclick = () => { renderLifeStats(); showScreen('screen-title'); };
+
+  if (ending.secret) setTimeout(() => goldRain(), 300);
+}
+
+/* ===================== UI 헬퍼 ===================== */
+function showScreen(id){ $$('.screen').forEach(s => s.classList.toggle('active', s.id === id)); window.scrollTo(0, 0); const el = $('#' + id); if (el) el.scrollTop = 0; }
+function setPrompt(title, sub, phase){ $('#turnTitle').textContent = title; $('#turnSub').textContent = sub || ''; $('#turnPrompt .ph').textContent = phase || 'PHASE'; }
+function showOverlay(id){ $('#' + id).classList.add('show'); }
+function hideOverlay(id){ $('#' + id).classList.remove('show'); }
+
+function flashBudget(kind){ const el = $('#hudBudget'); el.classList.remove('flash-bad', 'flash-good'); void el.offsetWidth; el.classList.add('flash-' + kind); }
+
+function renderHud(){
+  $('#hudYear').textContent = G.year;
+  $('#hudBudgetVal').textContent = Math.round(G.budget);
+  $('#hudProgress').style.width = (G.year / CFG.TOTAL_YEARS * 100) + '%';
+  const map = { eco:'Eco', cul:'Cul', grn:'Grn', sat:'Sat' };
+  for (const k of INDEX_KEYS){
+    const cap = k.charAt(0).toUpperCase() + k.slice(1);
+    $('#ix' + cap).textContent = G.idx[k];
+    $('#bar' + cap).style.width = G.idx[k] + '%';
+  }
+  const strip = $('#relicStrip');
+  strip.innerHTML = '<span class="lab">유물</span>' +
+    (G.relics.length ? G.relics.map(id => `<span class="relic-chip" title="${RELIC_MAP[id].nm}: ${RELIC_MAP[id].ds}">${RELIC_MAP[id].ico}</span>`).join('')
+                     : '<span style="color:var(--txt-dim);font-size:12px;">아직 없음</span>');
+}
+
+function renderCity(){
+  $('#cityCount').textContent = `${G.buildings.length} / ${CFG.GRID} 구역`;
+  const grid = $('#cityGrid');
+  grid.innerHTML = G.tiles.map((t, i) =>
+    `<div class="tile ${t ? 'filled' : ''} ${t && t.fresh ? 'pop' : ''}">${t ? t.ico : ''}</div>`).join('');
+  G.tiles.forEach(t => { if (t) t.fresh = false; });
+}
+function placeTile(ico){ const i = G.tiles.findIndex(t => t === null); if (i >= 0) G.tiles[i] = { ico, fresh:true }; }
+
+function renderSetup(step){
+  const box = $('#setupChoices');
+  if (step === 'city'){
+    $('#setupStep').textContent = 'STEP 1 / 2';
+    $('#setupTitle').textContent = '도시의 지형을 고르세요';
+    $('#setupDesc').textContent = '지형에 따라 유리한 건물과 전략이 달라집니다.';
+    box.innerHTML = setupCityChoices.map((c, i) => choiceHTML(c, i, true)).join('');
+    setupCityChoices.forEach((c, i) => box.children[i].onclick = () => chooseCity(c));
+  } else {
+    $('#setupStep').textContent = 'STEP 2 / 2';
+    $('#setupTitle').textContent = '시장을 선택하세요';
+    $('#setupDesc').textContent = '시장의 특기가 시작 지수와 운영 방향을 정합니다.';
+    box.innerHTML = setupMayorChoices.map((c, i) => choiceHTML(c, i, false)).join('');
+    setupMayorChoices.forEach((c, i) => box.children[i].onclick = () => chooseMayor(c));
+  }
+}
+function choiceHTML(c, i, isCity){
+  let tags;
+  if (isCity) tags = c.fx.map(f => `<span class="tag up">${f}</span>`).join('');
+  else tags = c.fx.map(f => `<span class="tag ${f[1]}">${f[0]} ${f[1] === 'up' ? '▲' : '▼'}</span>`).join('');
+  return `<button class="choice" style="animation:deal .4s ${i*0.05}s backwards">
+    <div class="ico">${c.ico}</div><div class="nm">${c.nm}</div>
+    <div class="ds">${c.ds}</div><div class="fx">${tags}</div></button>`;
+}
+
+/* ---- 부지 카드 ---- */
+function effStars(plot){ const e = clamp(Math.round(plot.sizeFactor * 2.2 - plot.upkeep * 0.12), 1, 5); return '★'.repeat(e) + '☆'.repeat(5 - e); }
+function roughGrade(plot){ const v = plot.sizeFactor; return v >= 1.6 ? 'A' : v >= 1.1 ? 'B' : 'C'; }
+function renderPlots(){
+  const area = $('#cardArea'); area.innerHTML = '';
+  G.plots.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'card land'; el.style.animationDelay = (i*0.06) + 's';
+    const reconLine = (!p.surveyed && has('recon')) ? `<span class="v">효율 ${roughGrade(p)}급</span>` : '<span class="v hidden">? ? ?</span>';
+    const investorLine = (p.surveyed && p.correct && has('investor')) ? ` · 예상이익 높음` : '';
+    let stats;
+    if (p.surveyed){
+      stats = `
+        <div class="statline"><span class="k">넓이</span><span class="v">${p.area} ㎡</span></div>
+        <div class="statline"><span class="k">둘레(추정)</span><span class="v">${p.peri} m</span></div>
+        <div class="statline"><span class="k">유지비/년</span><span class="v">${p.upkeep}</span></div>
+        <div class="statline"><span class="k">개발 효율</span><span class="v">${effStars(p)}${investorLine}</span></div>`;
+    } else {
+      stats = `
+        <div class="statline"><span class="k">넓이</span><span class="v hidden">측량 필요</span></div>
+        <div class="statline"><span class="k">유지비/년</span><span class="v hidden">측량 필요</span></div>
+        <div class="statline"><span class="k">사전 정보</span>${reconLine}</div>`;
+    }
+    const ctaTxt = p.surveyed ? (p.correct ? '🎯 정밀 개발하기' : '개발하기') : '📐 측량하기';
+    el.innerHTML = `
+      <div class="ribbon"><span>토지 · ${p.sub}</span><span>${p.kind === 'perimeter' ? '둘레' : p.kind === 'unit' ? '단위' : '넓이'}</span></div>
+      <div class="card-body">
+        <div class="ttl">${p.name}</div>
+        <div class="meta">${p.surveyed ? (p.correct ? '정밀 측량 완료' : '대략 측량됨') : '도면을 보고 측량하세요'}</div>
+        <div class="blueprint-slot">${wrapSvg(p.svg)}</div>
+        ${stats}
+        <button class="card-cta">${ctaTxt}</button>
+      </div>`;
+    el.querySelector('.card-cta').onclick = () => { if (p.surveyed) chooseToBuild(p); else openSurvey(p); };
+    area.appendChild(el);
+  });
+}
+
+/* ---- 건설 옵션 카드 ---- */
+function renderBuildOptions(plot, opts){
+  const area = $('#cardArea'); area.innerHTML = '';
+  opts.forEach((b, i) => {
+    const eff = computeBuild(plot, b), cost = buildCost(b), up = buildUpkeep(plot, b);
+    const fxHtml = INDEX_KEYS.filter(k => eff[k]).map(k => {
+      const cls = eff[k] < 0 ? 'fx-neg' : 'fx-' + k;
+      return `<span class="${cls}">${INDEX_LABEL[k]} ${eff[k] > 0 ? '+' : ''}${eff[k]}</span>`;
+    }).join('');
+    const afford = G.budget >= cost;
+    const el = document.createElement('div');
+    el.className = 'card build'; el.style.animationDelay = (i*0.06) + 's';
+    el.innerHTML = `
+      <div class="ribbon"><span>건물 · ${b.special ? 'SECRET' : 'BUILD'}</span><span>${b.ico}</span></div>
+      <div class="card-body">
+        <div class="ttl">${b.ico} ${b.nm}</div>
+        <div class="meta">건설비 ${cost} · 유지비/년 ${up}</div>
+        <div class="fx-mini">${fxHtml}</div>
+        <button class="card-cta" ${afford ? '' : 'disabled style="opacity:.45"'}>${afford ? '건설하기' : '예산 부족'}</button>
+      </div>`;
+    if (afford) el.querySelector('.card-cta').onclick = () => develop(plot, b);
+    area.appendChild(el);
+  });
+}
+
+/* ---- 토스트 & 해금 팝업 ---- */
+function toast(msg, type){ const t = document.createElement('div'); t.className = 'toast ' + (type || ''); t.textContent = msg; $('#toasts').appendChild(t); setTimeout(() => t.remove(), 3000); }
+let unlockQueue = [], unlockBusy = false;
+function queueUnlock(kind, ico, nm, ds){ unlockQueue.push({ kind, ico, nm, ds }); if (!unlockBusy) showNextUnlock(); }
+function showNextUnlock(){
+  if (unlockQueue.length === 0){ unlockBusy = false; return; }
+  unlockBusy = true;
+  const u = unlockQueue.shift();
+  $('#ukKind').textContent = u.kind; $('#ukIco').textContent = u.ico; $('#ukNm').textContent = u.nm; $('#ukDs').textContent = u.ds;
+  $('#unlockPop').classList.add('show');
+  setTimeout(() => { $('#unlockPop').classList.remove('show'); setTimeout(showNextUnlock, 350); }, 1700);
+}
+
+/* ---- 황금비 연출(숨겨진 엔딩) ---- */
+function goldRain(){
+  for (let i = 0; i < 40; i++){
+    const s = document.createElement('div');
+    s.textContent = pick(['✨', '🌟', '👑', '💛']);
+    s.style.cssText = `position:fixed;top:-30px;left:${Math.random()*100}vw;font-size:${12+Math.random()*20}px;z-index:95;pointer-events:none;transition:transform 3s linear,opacity 3s;`;
+    document.body.appendChild(s);
+    requestAnimationFrame(() => { s.style.transform = `translateY(110vh) rotate(${Math.random()*720}deg)`; s.style.opacity = '0'; });
+    setTimeout(() => s.remove(), 3200);
+  }
+}
+
+
+/* =========================================================================
+ *  [6] 도감 / 타이틀 / 안내서 / 초기화
+ * ========================================================================= */
+
+const CAT_NAME = Object.fromEntries(BUILDINGS.map(b => [b.cat, b.nm]));
+function reqText(d){ return Object.entries(d.req).map(([c, n]) => `${CAT_NAME[c] || c}${n > 1 ? '×' + n : ''}`).join(' + '); }
+
+let codexTab = 'ach';
+const CODEX_TABS = [['ach', '업적'], ['end', '엔딩'], ['dist', '특구'], ['relic', '유물']];
+function renderCodex(tab){
+  codexTab = tab;
+  const sv = load();
+  $('#codexTabs').innerHTML = CODEX_TABS.map(([id, nm]) =>
+    `<button class="codex-tab ${id === tab ? 'active' : ''}" data-tab="${id}">${nm}</button>`).join('');
+  $$('#codexTabs .codex-tab').forEach(b => b.onclick = () => renderCodex(b.dataset.tab));
+
+  let items = [], got = 0, totalCount = 0;
+  if (tab === 'ach'){
+    totalCount = ACHIEVEMENTS.length;
+    items = ACHIEVEMENTS.map(a => { const u = !!sv.achievements[a.id]; if (u) got++;
+      return codexItem(u, u ? a.ico : '🔒', a.nm, a.ds); });
+  } else if (tab === 'end'){
+    totalCount = ENDINGS.length;
+    items = ENDINGS.map(e => { const u = !!sv.endings[e.id]; if (u) got++;
+      if (!u && e.secret) return codexItem(false, '❓', '??? (숨겨진 엔딩)', '특별한 조건을 모두 만족하면 나타납니다.');
+      return codexItem(u, u ? e.grade : '🔒', u ? e.nm : '???', u ? e.ds : '아직 보지 못한 엔딩입니다.'); });
+  } else if (tab === 'dist'){
+    totalCount = DISTRICTS.length;
+    items = DISTRICTS.map(d => { const u = !!sv.districts[d.id]; if (u) got++;
+      return codexItem(u, u ? d.ico : '🔒', u ? d.nm : '???', `필요 건물: ${reqText(d)}` + (u ? `\n${d.ds}` : '')); });
+  } else {
+    totalCount = RELICS.length;
+    items = RELICS.map(r => { const u = !!sv.relics[r.id]; if (u) got++;
+      return codexItem(u, u ? r.ico : '🔒', u ? r.nm : '???', u ? r.ds : '아직 발굴하지 못한 유물입니다.'); });
+  }
+  $('#codexProgress').textContent = `수집 ${got} / ${totalCount}`;
+  $('#codexList').innerHTML = items.join('');
+}
+function codexItem(unlocked, ico, nm, ds){
+  return `<div class="codex-item ${unlocked ? '' : 'locked'}">
+    <div class="ci-ico">${ico}</div>
+    <div><div class="ci-nm">${nm}</div><div class="ci-ds">${(ds || '').replace(/\n/g, '<br>')}</div></div>
+  </div>`;
+}
+
+/* ---- 타이틀 하단 평생 통계 ---- */
+function renderLifeStats(){
+  const sv = load();
+  const ach = Object.keys(sv.achievements).length;
+  $('#lifeStats').innerHTML = `
+    <div class="life-stat"><b>${sv.gamesPlayed || 0}</b><span>완성한 도시</span></div>
+    <div class="life-stat"><b>${sv.bestScore || 0}</b><span>최고 점수</span></div>
+    <div class="life-stat"><b>${ach}/${ACHIEVEMENTS.length}</b><span>업적</span></div>
+    <div class="life-stat"><b>${sv.goldenCount || 0}</b><span>황금도시</span></div>`;
+}
+
+/* ---- 타이틀 청사진 일러스트 ---- */
+function buildTitleBlueprint(){
+  const c = '#7FB0E0', f = 'rgba(127,176,224,.12)', d = 'rgba(127,176,224,.45)';
+  $('#titleBlueprint').innerHTML = `
+  <svg viewBox="0 0 340 150" xmlns="http://www.w3.org/2000/svg">
+    <defs><pattern id="g" width="17" height="17" patternUnits="userSpaceOnUse">
+      <path d="M17 0H0V17" fill="none" stroke="rgba(127,176,224,.12)" stroke-width="1"/></pattern></defs>
+    <rect x="0" y="0" width="340" height="150" fill="url(#g)" rx="10"/>
+    <polygon points="40,110 110,110 95,60 55,60" fill="${f}" stroke="${c}" stroke-width="2"/>
+    <rect x="120" y="55" width="60" height="55" fill="${f}" stroke="${c}" stroke-width="2"/>
+    <polygon points="195,110 245,110 245,70 220,50 195,70" fill="${f}" stroke="${c}" stroke-width="2"/>
+    <polygon points="260,110 300,90 300,110" fill="${f}" stroke="${c}" stroke-width="2"/>
+    <line x1="40" y1="122" x2="110" y2="122" stroke="${d}" stroke-dasharray="4 3"/>
+    <text x="75" y="135" fill="#CFE0F2" font-family="monospace" font-size="10" text-anchor="middle">밑변 × 높이 ÷ 2</text>
+    <line x1="120" y1="122" x2="180" y2="122" stroke="${d}" stroke-dasharray="4 3"/>
+    <text x="150" y="135" fill="#CFE0F2" font-family="monospace" font-size="10" text-anchor="middle">둘레 = 4 × 변</text>
+    <circle cx="300" cy="40" r="13" fill="none" stroke="${c}" stroke-width="2"/>
+    <text x="300" y="44" fill="${c}" font-family="monospace" font-size="14" text-anchor="middle">▦</text>
+  </svg>`;
+}
+
+/* ---- 측량 안내서 ---- */
+function showHowto(){
+  $('#evTitle').textContent = '측량 안내서';
+  $('#evDesc').innerHTML = `당신은 <b>측량단의 단장</b>입니다. 20년 동안 이렇게 도시를 키웁니다.`;
+  const box = $('#evChoices'); box.innerHTML = `
+    <div class="event-choice" style="cursor:default"><div class="ec-t">📐 1. 측량하기</div>
+      <div class="ec-d">매년 땅 후보가 나옵니다. 도면을 보고 <b>넓이</b>나 <b>둘레</b>를 계산하면 그 땅의 진짜 가치가 드러나요.</div></div>
+    <div class="event-choice" style="cursor:default"><div class="ec-t">🏗️ 2. 개발하기</div>
+      <div class="ec-d"><b>넓은 땅</b>일수록 건물 효과가 큽니다. 하지만 <b>둘레가 길면 유지비</b>가 매년 빠져나가요. 작아도 효율 좋은 땅이 이길 수 있습니다.</div></div>
+    <div class="event-choice" style="cursor:default"><div class="ec-t">🧩 3. 특구 · 유물 · 엔딩</div>
+      <div class="ec-d">건물을 잘 조합하면 <b>특구</b>가 생기고, <b>유물</b>로 나만의 빌드를 만듭니다. 정답률 100%로 모든 조건을 채우면 숨겨진 <b>황금도시</b> 엔딩에 도전할 수 있어요.</div></div>
+    <button class="btn btn-gold btn-block" id="howtoClose" style="margin-top:6px;">측량 시작</button>`;
+  showOverlay('overlayEvent');
+  $('#howtoClose').onclick = () => { hideOverlay('overlayEvent'); startNewGame(); };
+}
+
+/* ---- 초기화 & 이벤트 바인딩 ---- */
+function init(){
+  buildTitleBlueprint();
+  renderLifeStats();
+  $('#cityGrid').innerHTML = new Array(CFG.GRID).fill('<div class="tile"></div>').join('');
+
+  $('#btnStart').onclick = startNewGame;
+  $('#btnHowto').onclick = showHowto;
+  $('#btnCodex').onclick = () => { renderCodex('ach'); showScreen('screen-codex'); };
+  $('#codexBack').onclick = () => { renderLifeStats(); showScreen('screen-title'); };
+
+  // 계산 입력: Enter 제출
+  $('#calcInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('#calcSubmit').click(); });
+  // 오버레이 바깥 클릭 방지(실수 닫힘 방지) — 계산/이벤트는 버튼으로만 닫힘
+}
+document.addEventListener('DOMContentLoaded', init);
+
+</script>
+</body>
+</html>
