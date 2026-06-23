@@ -906,11 +906,22 @@ const SHAPE = {
  *  반환: { kind, sub, svg, prompt, answer, unit, formula, area, peri, sizeFactor, upkeep, name }
  *  kind: 'area' | 'perimeter' | 'unit'
  */
-const PLOT_NAMES = {
-  area: ['강변 삼각 부지','중앙 사다리꼴 부지','언덕 평행사변형 부지','보석 마름모 부지','광장 직사각 부지','반듯한 정사각 부지'],
-  perimeter: ['외곽 경계 부지','울타리 부지','다각형 공터','경계가 긴 부지'],
-  unit: ['옛 등기 부지','㎠ 표기 부지'],
-};
+/* 땅 이름은 '실제 도형'에서 생성하여 (분류 · 이름 · 도면)이 항상 일치하게 한다 */
+const PLOT_FLAVOR = ['강변','호숫가','중앙','언덕','남부','북부','외곽','역세권','신항','구도심','대로변','공원 옆','햇살','전망 좋은','노을'];
+const SHAPE_WORD = { '삼각형':'삼각','평행사변형':'평행사변','사다리꼴':'사다리꼴','마름모':'마름모','직사각형':'직사각','정사각형':'정사각','정오각형':'오각','정육각형':'육각','ㄱ자형':'ㄱ자' };
+function shapeName(sub){ return `${pick(PLOT_FLAVOR)} ${SHAPE_WORD[sub] || ''} 부지`; }
+const UNIT_NAMES = ['옛 등기 부지','㎠ 표기 부지','오래된 등기 부지','등기 갱신 부지'];
+
+/* 단위 변환 부지용 도면: 치수를 적지 않은 '등기 도면'(문제 숫자와 충돌 방지) */
+function unitDeedSVG(srcUnit){
+  const x = cx - 72, y = cy - 52, w = 144, h = 104;
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${BP.fill}" stroke="${BP.fig}" stroke-width="2.5"/>`
+    + `<line x1="${x+16}" y1="${y+30}" x2="${x+w-16}" y2="${y+30}" stroke="${BP.dim}" stroke-dasharray="5 4"/>`
+    + `<line x1="${x+16}" y1="${y+46}" x2="${x+w-34}" y2="${y+46}" stroke="${BP.dim}" stroke-dasharray="5 4"/>`
+    + `<circle cx="${x+w-34}" cy="${y+h-30}" r="21" fill="none" stroke="${BP.fig}" stroke-width="2"/>`
+    + T(x+w-34, y+h-30, srcUnit, 'middle', 14)
+    + T(cx, y-13, '토지 등기 도면', 'middle', 12);
+}
 
 function makeAreaPlot(){
   const t = pick(['triangle','para','trap','rhombus','rect','square']);
@@ -929,7 +940,7 @@ function makeAreaPlot(){
     answer = sd*sd; prompt = `정사각형 부지의 넓이는?`; formula = `한 변 × 한 변 = ${sd} × ${sd}`; sub='정사각형'; }
   const area = answer;
   return { kind:'area', sub, shapeKey, svg, prompt, answer, unit:'㎡', formula,
-    area, peri: Math.round(Math.sqrt(area)*3.6), name: pick(PLOT_NAMES.area) };
+    area, peri: Math.round(Math.sqrt(area)*3.6), name: shapeName(sub) };
 }
 
 function makePerimeterPlot(){
@@ -949,21 +960,22 @@ function makePerimeterPlot(){
     answer = a + b + c + d + (a-c) + (b-d); formula = `여섯 변을 모두 더하면`; sub='ㄱ자형'; }
   const peri = answer;
   return { kind:'perimeter', sub, shapeKey:t, svg, prompt:`이 부지의 둘레는?`, answer, unit:'m', formula,
-    area: rnd(60,90), peri, name: pick(PLOT_NAMES.perimeter) };
+    area: rnd(60,90), peri, name: shapeName(sub) };
 }
 
 function makeUnitPlot(){
   const dir = Math.random() < 0.62 ? 'c2m' : 'm2c';
-  let prompt, answer, unit, formula, sub, realArea;
-  // 보기용 도면(직사각형)
-  const w = rnd(5,16), h = rnd(4,12); const svg = SHAPE.rect(w,h).svg;
+  let prompt, answer, unit, formula, sub, realArea, svg;
   if (dir === 'c2m'){ realArea = rnd(20,170); const cm2 = realArea * 10000;
     prompt = `등기부에 ${cm2.toLocaleString()} ㎠ 로 적혀 있다. ㎡로 고치면?`;
-    answer = realArea; unit='㎡'; formula = `1 ㎡ = 10000 ㎠ → ${cm2.toLocaleString()} ÷ 10000`; sub='㎠ → ㎡'; }
-  else { realArea = rnd(2,9); prompt = `이 부지는 ${realArea} ㎡ 다. ㎠로 고치면?`;
-    answer = realArea * 10000; unit='㎠'; formula = `1 ㎡ = 10000 ㎠ → ${realArea} × 10000`; sub='㎡ → ㎠'; }
-  return { kind:'unit', sub, shapeKey:'rect', svg, prompt, answer, unit, formula,
-    area: realArea, peri: Math.round(Math.sqrt(realArea)*3.6), name: pick(PLOT_NAMES.unit) };
+    answer = realArea; unit='㎡'; formula = `1 ㎡ = 10000 ㎠ → ${cm2.toLocaleString()} ÷ 10000`; sub='㎠ → ㎡';
+    svg = unitDeedSVG('㎠'); }
+  else { realArea = rnd(2,9);
+    prompt = `등기부에 ${realArea} ㎡ 로 적혀 있다. ㎠로 고치면?`;
+    answer = realArea * 10000; unit='㎠'; formula = `1 ㎡ = 10000 ㎠ → ${realArea} × 10000`; sub='㎡ → ㎠';
+    svg = unitDeedSVG('㎡'); }
+  return { kind:'unit', sub, shapeKey:'deed', svg, prompt, answer, unit, formula,
+    area: realArea, peri: Math.round(Math.sqrt(realArea)*3.6), name: pick(UNIT_NAMES) };
 }
 
 /* 부지 1개 생성 (종류 가중치) */
